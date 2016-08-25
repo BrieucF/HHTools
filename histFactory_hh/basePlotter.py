@@ -49,20 +49,12 @@ class BasePlotter:
         #date = "2016_05_27"
         #nodes = ["SM", "box", "5", "8", "13", "all"]
         
-        # v3 benchmark BDTs (w/ NLO DY)
         date = "2016_07_05"
-        nodes = ["SM", "2", "5", "6", "12"]
-        #nodes = ["SM", "2"] # Chosen BDTs
         
         suffixes = ["VS_TT_DYHTonly_tW_8var"]
         BDToutputs = {}
         bdtNames = []
         BDToutputsVariable = {}
-        for node in nodes:
-            for suffix in suffixes:
-                bdtName = bdtNameTemplate.replace("DATE", date).replace("NODE", node).replace("SUFFIX", suffix)
-                bdtNames.append(bdtName)
-                BDToutputsVariable[bdtName] = baseStringForMVA_part1.replace("BDTNAME", bdtName) + baseStringForMVA_part2
 
         # Possible stages (selection)
         mll_cut = "((91 - {0}.M()) > 15)".format(self.ll_str)
@@ -73,11 +65,10 @@ class BasePlotter:
                "mjj_blind": self.joinCuts(mjj_blind, mll_cut),
                }
         # High-BDT stages
-        for node in nodes:
-            for suffix in suffixes:
-                bdtName = bdtNameTemplate.replace("DATE", date).replace("NODE", node).replace("SUFFIX", suffix)
-                BDToutput = baseStringForMVA_part1.replace("BDTNAME", bdtName) + baseStringForMVA_part2
-                dict_stage_cut["highBDT_node_" + node] = self.joinCuts(BDToutput + ">0", mll_cut)
+        for suffix in suffixes:
+            bdtName = bdtNameTemplate.replace("DATE", date).replace("NODE", node).replace("SUFFIX", suffix)
+            BDToutput = baseStringForMVA_part1.replace("BDTNAME", bdtName) + baseStringForMVA_part2
+            dict_stage_cut["highBDT_node_" + node] = self.joinCuts(BDToutput + ">0", mll_cut)
 
         # Categories (lepton flavours)
         self.dict_cat_cut =  {

@@ -30,28 +30,9 @@ def getBinningStrWithMax(nBins, start, end, max):
 
 includes = []
 plots = []
-code_before_loop = ""
 
 # Needed to evaluate MVA outputs
-includes.append( os.path.join(scriptDir, "..", "common", "readMVA.h") )
-
-# For cluster reweighting
-includes.append( os.path.join(scriptDir, "..", "common", "reweight_v1tov3.h") )
-
-code_before_loop += """
-getBenchmarkReweighter("/home/fynu/sbrochet/scratch/Framework/CMSSW_7_6_5/src/cp3_llbb/HHTools/scripts/", 0, 11);
-"""
-## For v1->v1 checks:
-#code_before_loop += """
-#getBenchmarkReweighter("/home/fynu/swertz/scratch/CMSSW_7_6_3_patch2/src/cp3_llbb/HHTools/scripts/", 2, 13);
-#"""
-
-sample_weights = {}
-for node in range(1, 13):
-    sample_weights[ "cluster_node_" + str(node) ] = "getBenchmarkReweighter().getWeight({}-1, hh_gen_mHH, hh_gen_costhetastar)".format(node)
-## For v1->v1 checks:
-#for node in range(2, 14):
-#    sample_weights[ "cluster_node_rwgt_" + str(node) ] = "getBenchmarkReweighter().getWeight({}, hh_gen_mHH, hh_gen_costhetastar)".format(node)
+#includes.append( os.path.join(scriptDir, "..", "common", "readMVA.h") )
 
 # Plot configuration
 
