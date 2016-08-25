@@ -30,9 +30,9 @@ IDsToSplitMore = []
 
 # Data
 IDs.extend([
-    1642, # DoubleEG
-    1662, # MuonEG
-    1716, # DoubleMuon
+    2008, # DoubleEG
+    2009, # MuonEG
+    2010, # DoubleMuon
     ])
 
 # Main backgrounds:
