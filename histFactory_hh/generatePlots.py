@@ -49,37 +49,9 @@ stage_llbb = "no_cut"
 plots_llbb = plots_lljj
 #plots_llbb = ["bdtinput", "mjj"]
 
-#systematics = {"modifObjects" : ["nominal"]}
-systematics = {"modifObjects" : ["nominal", "jecup", "jecdown", "jerup", "jerdown"], "SF" : ["elidisoup", "elidisodown", "muidup", "muiddown", "muisoup", "muisodown", "jjbtagup", "jjbtagdown", "puup", "pudown", "trigeffup", "trigeffdown", "pdfup", "pdfdown", "scale", "scaleUncorr"]}
+systematics = {"modifObjects" : ["nominal"]}
+#systematics = {"modifObjects" : ["nominal", "jecup", "jecdown", "jerup", "jerdown"], "SF" : ["elidisoup", "elidisodown", "muidup", "muiddown", "muisoup", "muisodown", "jjbtagup", "jjbtagdown", "puup", "pudown", "trigeffup", "trigeffdown", "pdfup", "pdfdown", "scale", "scaleUncorr"]}
 #systematics = {"modifObjects" : ["nominal"], "SF" : ["scale"]}
-
-# Define binning of 2D templates for fitting
-chosen2Dbinnings = {
-        "3x25": {
-            "mjjBinning": "3, { 0, 75, 140, 13000 }",
-            "bdtNbins": 25
-        },
-        # "25x25": {
-        #     "mjjBinning": getBinningStrWithMax(25, 0, 600, 13000), 
-        #     "bdtNbins": 25
-        # },
-        # "20x20": {
-        #     "mjjBinning": getBinningStrWithMax(20, 0, 600, 13000), 
-        #     "bdtNbins": 20
-        # },
-        # "10x10": {
-        #     "mjjBinning": getBinningStrWithMax(10, 0, 600, 13000), 
-        #     "bdtNbins": 10
-        # },
-        # "10x25": {
-        #     "mjjBinning": getBinningStrWithMax(10, 0, 600, 13000), 
-        #     "bdtNbins": 25
-        # },
-        # "5x25": {
-        #     "mjjBinning": getBinningStrWithMax(5, 0, 600, 13000), 
-        #     "bdtNbins": 25
-        # },
-    }
 
 for systematicType in systematics.keys():
     
@@ -90,30 +62,20 @@ for systematicType in systematics.keys():
             objects = "nominal" #ensure that we use normal hh_objects for systematics not modifying obect such as scale factors 
 
         ## lljj 
-        basePlotter_lljj = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_nobtag_csv", btagWP_str = 'nobtag', objects = objects)
+        basePlotter_lljj = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_nobtag_pt", btagWP_str = 'nobtag', objects = objects)
         
         #plots.extend(basePlotter_lljj.generatePlots(categories_lljj, stage_lljj, systematic = systematic, weights = weights_lljj, requested_plots = plots_lljj))
-        plots.extend(basePlotter_lljj.generatePlots(["All", "MuMu", "ElEl", "MuEl"], stage_lljj, systematic = systematic, weights = weights_lljj, requested_plots = ["mll"]))
+        plots.extend(basePlotter_lljj.generatePlots(["All", "MuMu", "ElEl", "MuEl", "SF"], stage_lljj, systematic = systematic, weights = weights_lljj, requested_plots = ["mll", "basic", "mjj", "csv", "bdtinput", "isElEl"]))
         
         
         ## llbb 
-        basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = objects)
+        basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_pt_inclusive", btagWP_str = 'medium', objects = objects)
        
         ## No mll cut
         #plots.extend(basePlotter_llbb.generatePlots(categories_llbb, stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = plots_llbb))
-        plots.extend(basePlotter_llbb.generatePlots(["All", "MuMu", "ElEl", "MuEl"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll"]))
-        
-        ## With mll cut
-        plots.extend(basePlotter_llbb.generatePlots(categories_llbb, "mll_cut", systematic = systematic, weights = weights_llbb, requested_plots = plots_llbb))
-        plots.extend(basePlotter_llbb.generatePlots(categories_llbb, "mll_cut", systematic = systematic, weights = weights_llbb, requested_plots = ["bdtoutput", "mjj", "mjj_vs_bdt"], fit2DtemplatesBinning = chosen2Dbinnings))
-
-        # if systematic == 'nominal':
-            # plots.extend(basePlotter_llbb.generatePlots(categories_llbb, "mll_cut", systematic = systematic, weights = weights_llbb, requested_plots = ["llidisoWeight"], fit2DtemplatesBinning = chosen2Dbinnings))
-        
-        ## With mll cut + actually cut into mjj sidebands
-        #plots.extend(basePlotter_llbb.generatePlots(categories_llbb, "mjj_blind", systematic = systematic, weights = weights_llbb, requested_plots = plots_llbb))
-        #plots.extend(basePlotter_llbb.generatePlots(categories_llbb, "mjj_blind", systematic = systematic, weights = weights_llbb, requested_plots = ["bdtoutput"]))
-        
-        ## With mll cut + select into high-BDT regions
-        #plots.extend(basePlotter_llbb.generatePlots(categories_llbb, "highBDT_node_SM", systematic = systematic, weights = weights_llbb, requested_plots = plots_llbb))
-        #plots.extend(basePlotter_llbb.generatePlots(categories_llbb, "highBDT_node_2", systematic = systematic, weights = weights_llbb, requested_plots = plots_llbb))
+        plots.extend(basePlotter_llbb.generatePlots(["All", "MuMu", "ElEl", "MuEl", "SF"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "basic", "mjj", "csv", "bdtinput", "isElEl"], extraString=""))
+        basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_pt", btagWP_str = 'medium', objects = objects)
+        plots.extend(basePlotter_llbb.generatePlots(["All", "MuMu", "ElEl", "MuEl", "SF"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "basic", "mjj", "csv", "bdtinput", "isElEl"], extraString=""))
+        basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = objects)
+        plots.extend(basePlotter_llbb.generatePlots(["All", "MuMu", "ElEl", "MuEl", "SF"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "basic", "mjj", "csv", "bdtinput", "isElEl"], extraString=""))
+       

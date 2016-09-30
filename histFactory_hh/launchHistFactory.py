@@ -27,6 +27,7 @@ def get_sample(iSample):
 
 IDs = []
 IDsToSplitMore = []
+IDsToSplitMore.append(2032) ## TTFl
 
 # Data
 IDs.extend([
@@ -35,109 +36,116 @@ IDs.extend([
     2010, # DoubleMuon
     ])
 
-# Main backgrounds:
-IDs.extend([
-    1817, # tW top
-    1846, # tW atop
-    1894, # sT t-chan
-    1909, # TT incl NLO
-    1915, # DY M10-50 NLO merged
-    1918, # DY M-50 NLO merged 
-    ])
+IDs.extend(range(2011, 2068+1))
+IDs.extend([2072]) #WZTo2L2Q
+IDs.extend([2133]) #DY_10_50 merged
+IDs.remove(2059) # DY_10_50 not merged
+IDs.remove(2030) # DY_10_50 not merged
+IDs.remove(2017) # DY_10_50 not merged
 
-# DY LO
-IDs.extend([
-    # M-50 incl. merged
-    1920,
-    # M-50, binned HT > 100
-    1884, # 100-200 non-merged
-    1848, # 200-400 non-merged
-    1917, # 400-600 merged
-    1919, # 600-Inf merged
-    # M-5to50 incl.: forget it...
-    1878,
-    # M-5to50, binned HT
-    1916, # 100-200 merged
-    1815, # 200-400 non-merged
-    1824, # 400-600 non-merged
-    1914, # 600-Inf merged
-    ])
+## Main backgrounds:
+#IDs.extend([
+#    1817, # tW top
+#    1846, # tW atop
+#    1894, # sT t-chan
+#    1909, # TT incl NLO
+#    1915, # DY M10-50 NLO merged
+#    1918, # DY M-50 NLO merged 
+#    ])
 #
-# Other backgrounds
-# VV
-IDs.extend([
-    #1624, # VV(2L2Nu)
-    
-    1897, # WW(LNuQQ)
-    1892, # WW(2L2Nu)
-    
-    1899, # WZ(3LNu)
-    1838, # WZ(L3Nu)
-    1908, # WZ(LNu2Q)
-    1902, # WZ(2L2Q)
-    
-    1834, # ZZ(4L)
-    1893, # ZZ(2L2Nu)
-    1896, # ZZ(2L2Q)
-    
-    1872, # WZZ
-    ])
-
-# Higgs
-IDs.extend([
-    # ggH ==> no H(ZZ)?
-    1844, # H(WW(2L2Nu))
-    1849, # H(BB)
-
-    # ZH
-    1847, # ggZ(LL)H(WW(2L2Nu))
-    1821, # ZH(WW)
-    1866, # ggZ(LL)H(BB)
-    1828, # Z(LL)H(BB)
-    1883, # ggZ(NuNu)H(BB)
-    
-    # VBF
-    1833, # VBFH(BB)
-    1901, # VBFH(WW(2L2Nu))
-
-    # WH
-    1875, # W+(LNu)H(BB)
-    1854, # W-(LNu)H(BB)
-    1862, # W+H(WW)
-    1858, # W-H(WW)
-
-    # bbH
-    1869, # bbH(BB) ybyt
-    1874, # bbH(BB) yb2
-    1841, # bbH(WW) ybyt
-    1819, # bbH(WW) yb2
-    ])
-
-# Top
-IDs.extend([
-    1837, # sT s-channel
-    1818, # TTW(LNu)
-    1831, # TTW(QQ)
-    1863, # TTZ(2L2Nu)
-    1880, # TTZ(QQ),
-    1839, # ttH(bb)
-    1906, # ttH(nonbb)
-    #1711, # TT(2L2Nu)
-    ])
-
-# # TT aMC@NLO
-# IDs.append(1929)
-
-# Wjets
-IDs.extend([
-    1876, # JetsLNu
-
-    # HT binned
-    1904, # 200-400
-    1825, # 800-1200
-    1907, # 1200 - 2500
-    1898, # 2500 - Inf 
-    ])
+## DY LO
+#IDs.extend([
+#    # M-50 incl. merged
+#    1920,
+#    # M-50, binned HT > 100
+#    1884, # 100-200 non-merged
+#    1848, # 200-400 non-merged
+#    1917, # 400-600 merged
+#    1919, # 600-Inf merged
+#    # M-5to50 incl.: forget it...
+#    1878,
+#    # M-5to50, binned HT
+#    1916, # 100-200 merged
+#    1815, # 200-400 non-merged
+#    1824, # 400-600 non-merged
+#    1914, # 600-Inf merged
+#    ])
+##
+## Other backgrounds
+## VV
+#IDs.extend([
+#    #1624, # VV(2L2Nu)
+#    
+#    1897, # WW(LNuQQ)
+#    1892, # WW(2L2Nu)
+#    
+#    1899, # WZ(3LNu)
+#    1838, # WZ(L3Nu)
+#    1908, # WZ(LNu2Q)
+#    1902, # WZ(2L2Q)
+#    
+#    1834, # ZZ(4L)
+#    1893, # ZZ(2L2Nu)
+#    1896, # ZZ(2L2Q)
+#    
+#    1872, # WZZ
+#    ])
+#
+## Higgs
+#IDs.extend([
+#    # ggH ==> no H(ZZ)?
+#    1844, # H(WW(2L2Nu))
+#    1849, # H(BB)
+#
+#    # ZH
+#    1847, # ggZ(LL)H(WW(2L2Nu))
+#    1821, # ZH(WW)
+#    1866, # ggZ(LL)H(BB)
+#    1828, # Z(LL)H(BB)
+#    1883, # ggZ(NuNu)H(BB)
+#    
+#    # VBF
+#    1833, # VBFH(BB)
+#    1901, # VBFH(WW(2L2Nu))
+#
+#    # WH
+#    1875, # W+(LNu)H(BB)
+#    1854, # W-(LNu)H(BB)
+#    1862, # W+H(WW)
+#    1858, # W-H(WW)
+#
+#    # bbH
+#    1869, # bbH(BB) ybyt
+#    1874, # bbH(BB) yb2
+#    1841, # bbH(WW) ybyt
+#    1819, # bbH(WW) yb2
+#    ])
+#
+## Top
+#IDs.extend([
+#    1837, # sT s-channel
+#    1818, # TTW(LNu)
+#    1831, # TTW(QQ)
+#    1863, # TTZ(2L2Nu)
+#    1880, # TTZ(QQ),
+#    1839, # ttH(bb)
+#    1906, # ttH(nonbb)
+#    #1711, # TT(2L2Nu)
+#    ])
+#
+## # TT aMC@NLO
+## IDs.append(1929)
+#
+## Wjets
+#IDs.extend([
+#    1876, # JetsLNu
+#
+#    # HT binned
+#    1904, # 200-400
+#    1825, # 800-1200
+#    1907, # 1200 - 2500
+#    1898, # 2500 - Inf 
+#    ])
 
 # QCD ==> 30to50 missing
 # IDs.extend([
@@ -152,13 +160,11 @@ IDs.extend([
    # ])
 
 # NonResonant with GEN info
-IDsToSplitMore.extend([
-    1927, # SM
-    1928, # box
-    ])
+#IDsToSplitMore.extend([
+#    ])
 
 # NonResonant merged
-IDsToSplitMore.append(1903)
+#IDsToSplitMore.append(IDs[-1])
 
 parser = argparse.ArgumentParser(description='Facility to submit histFactory jobs on condor.')
 parser.add_argument('-o', '--output', dest='output', default=str(datetime.date.today()), help='Name of the output directory.')
@@ -173,8 +179,9 @@ parser.add_argument('--tree', dest='treeFactory', action='store_true', default=F
 args = parser.parse_args()
 
 # get one of the new samples with gen info to read Tree structure
-sample = get_sample(1903)
+sample = get_sample(IDs[-1])
 files = ["/storage/data/cms/" + x.lfn for x  in sample.files]
+
 
 if args.test: 
     jsonName = "jsonTest.json"
@@ -183,12 +190,13 @@ if args.test:
     for datasetName in datasetDict.keys():
         rootFileName = datasetDict[datasetName]["files"][0]
         break
+    print "Will build things based on %s"%rootFileName
 
 samples = []
 for ID in IDs + IDsToSplitMore:
     filesperJob = 15
     if ID in IDsToSplitMore:
-        filesperJob = 3
+        filesperJob = 5
     samples.append(
         {
             "ID": ID,
@@ -220,6 +228,7 @@ if not args.skip :
     if args.test : 
         os.system(os.path.join("../../", "CommonTools", toolDir, "build", toolScript) + " %s %s %s"%(rootFileName, args.plotter, args.output))
     else : 
+        print "Will build things based on %s"%files[0]
         os.system(os.path.join("../../", "CommonTools", toolDir, "build", toolScript) + " %s %s %s"%(files[0], args.plotter, args.output))
 
 
