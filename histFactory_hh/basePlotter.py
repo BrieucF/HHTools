@@ -1,7 +1,57 @@
 import copy, sys
 
+bjet_binningX = range(0, 200, 5) + range(200, 400, 20) + [400, 450, 500, 550, 600, 700, 800, 2000]
+bjet_binningY = [-500, -400] + range(-300, -200, 50) + range(-200, -50, 10) + range(-50, 0, 5) + range(0, 50, 5) + range(50, 200, 10) + range(200, 300, 50) + [300, 400, 500]
+
+#bjet_BA_binningX = range(0, 200, 5) + range(200, 360, 20) + [360, 400, 1000] 
+#bjet_BA_binningY = range(-500, -200, 100) + range(-200, -100, 20) + range(-100, 0, 10) + range(0, 100, 10) + range(100, 200, 20) + range(200, 500, 100) + [500]
+#
+#bjet_EC_binningX = range(0, 200, 10) + range(200, 500, 20) + [500, 550, 600, 800, 2000]
+#bjet_EC_binningY = range(-500, -200, 100) + range(-200, -50, 20) + range(-50, 0, 10) + range(0, 50, 10) + range(50, 200, 20) + range(200, 500, 100) + [500]
+
+bjet_BA_binningX = bjet_binningX
+bjet_BA_binningY = bjet_binningY
+
+bjet_EC_binningX = bjet_binningX
+bjet_EC_binningY = bjet_binningY
+
+bjet_nBinsX = str(len(bjet_binningX)-1)
+bjet_binningX = "{" + str(bjet_binningX).strip("[").strip("]") + "}"
+bjet_nBinsY = str(len(bjet_binningY)-1)
+bjet_binningY = "{" + str(bjet_binningY).strip("[").strip("]") + "}"
+
+bjet_BA_nBinsX = str(len(bjet_BA_binningX)-1)
+bjet_BA_binningX = "{" + str(bjet_BA_binningX).strip("[").strip("]") + "}"
+bjet_BA_nBinsY = str(len(bjet_BA_binningY)-1)
+bjet_BA_binningY = "{" + str(bjet_BA_binningY).strip("[").strip("]") + "}"
+
+bjet_EC_nBinsX = str(len(bjet_EC_binningX)-1)
+bjet_EC_binningX = "{" + str(bjet_EC_binningX).strip("[").strip("]") + "}"
+bjet_EC_nBinsY = str(len(bjet_EC_binningY)-1)
+bjet_EC_binningY = "{" + str(bjet_EC_binningY).strip("[").strip("]") + "}"
+
+# Egen starts at 0 (bad if we do not reweight partonic config with efficiency to be reconstructed)
+#mu_binningX = [0, 10, 20] + range(25, 200, 5) + range(200, 400, 20) + [400, 450, 500, 550, 600, 700, 800, 2000]
+#mu_binningY = [-200, -100] + range(-50, -20, 10) + range(-20, -10, 5) + range(-10, -3, 1) + [-3 + x * 0.2 for x in range(0, 30)] + range(3, 10, 1) + range(10, 20, 2) + range(20, 50, 3) + [50, 100, 200]
+# Egen starts at 0 (bad if we do not reweight partonic config with efficiency to be reconstructed)
+mu_binningX = [8, 10, 12, 14, 16, 18, 20, 22] + range(25, 200, 5) + range(200, 400, 20) + [400, 450, 500, 550, 600, 700, 800, 2000]
+mu_binningY = [-200, -100] + range(-50, -20, 10) + range(-20, -10, 5) + range(-10, -3, 1) + [-3 + x * 0.2 for x in range(0, 30)] + range(3, 10, 1) + range(10, 20, 5) + range(20, 50, 10) + [50, 100, 200]
+#Dont put the following line after having stripped the mu_binning ;-)
+el_binningX = [13, 15, 17, 20, 23] + range(25, 200, 5) + range(200, 400, 20) + [400, 450, 500, 550, 600, 700, 800, 2000]
+el_binningY = mu_binningY
+
+mu_nBinsX = str(len(mu_binningX)-1)
+mu_binningX = "{" + str(mu_binningX).strip("[").strip("]") + "}"
+mu_nBinsY = str(len(mu_binningY)-1)
+mu_binningY = "{" + str(mu_binningY).strip("[").strip("]") + "}"
+
+el_nBinsX = str(len(el_binningX)-1)
+el_binningX = "{" + str(el_binningX).strip("[").strip("]") + "}"
+el_nBinsY = str(len(el_binningY)-1)
+el_binningY = "{" + str(el_binningY).strip("[").strip("]") + "}"
+
 class BasePlotter:
-    def __init__(self, baseObjectName = "hh_llmetjj_allTight_btagM_csv", btagWP_str = 'medium', objects = "nominal", WP = ["T", "T", "T", "T", "L", "L", "M", "M", "csv"]):
+    def __init__(self, baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "nominal", WP = ["T", "T", "T", "T", "L", "L", "M", "M", "csv"]):
         # systematic should be jecup, jecdown, jerup or jerdown. The one for lepton, btag, etc, have to be treated with the "weight" parameter in generatePlots.py (so far)
 
         self.baseObject = baseObjectName+"[0]"
@@ -35,7 +85,7 @@ class BasePlotter:
         self.sanityCheck = "Length$(%s)>0"%baseObjectName
 
     
-    def generatePlots(self, categories = ["All"], stage = "cleaning_cut", requested_plots = [], weights = ['trigeff', 'jjbtag', 'llidiso', 'pu'], extraCut = "", systematic = "nominal", extraString = "", fit2DtemplatesBinning = None):
+    def generatePlots(self, categories = ["All"], stage = "cleaning_cut", requested_plots = [], weights = ['trigeff', 'jjbtag', 'llidiso', 'pu'], extraCut = "", systematic = "nominal", extraString = ""):
 
         # MVA evaluation : ugly but necessary part
         baseStringForMVA_part1 = 'evaluateMVA("/home/fynu/sbrochet/scratch/Framework/CMSSW_7_6_5/src/cp3_llbb/HHTools//mvaTraining_hh/weights/BDTNAME_kBDT.weights.xml", '
@@ -66,16 +116,16 @@ class BasePlotter:
                }
         # High-BDT stages
         for suffix in suffixes:
-            bdtName = bdtNameTemplate.replace("DATE", date).replace("NODE", node).replace("SUFFIX", suffix)
+            bdtName = bdtNameTemplate.replace("DATE", date).replace("SUFFIX", suffix)
             BDToutput = baseStringForMVA_part1.replace("BDTNAME", bdtName) + baseStringForMVA_part2
-            dict_stage_cut["highBDT_node_" + node] = self.joinCuts(BDToutput + ">0", mll_cut)
+            dict_stage_cut["highBDT_node_"] = self.joinCuts(BDToutput + ">0", mll_cut)
 
-        # Categories (lepton flavours)
+        # Categories (lepton flavours) and trigger requirement
         self.dict_cat_cut =  {
-            "ElEl": "({0}.isElEl && (hh_elel_fire_trigger_Ele17_Ele12_cut || runOnMC) && (runOnElEl || runOnMC) && {1}.M() > 12)".format(self.baseObject, self.ll_str),
+            "ElEl": "({0}.isElEl && ((hh_elel_fire_trigger_Ele17_Ele12_cut || runOnMC) && (runOnElEl || runOnMC) && {1}.M() > 12))".format(self.baseObject, self.ll_str),
             "MuMu": "({0}.isMuMu && (hh_mumu_fire_trigger_Mu17_Mu8_cut || hh_mumu_fire_trigger_Mu17_TkMu8_cut || runOnMC) && (runOnMuMu || runOnMC) && {1}.M() > 12)".format(self.baseObject, self.ll_str),
             "MuEl": "((({0}.isElMu && (hh_elmu_fire_trigger_Mu8_Ele17_cut || runOnMC)) || ({0}.isMuEl && (hh_muel_fire_trigger_Mu17_Ele12_cut || runOnMC))) && (runOnElMu || runOnMC) && {1}.M() > 12)".format(self.baseObject, self.ll_str)
-                        }   
+                        }
         cut_for_All_channel = "(" + self.dict_cat_cut["ElEl"] + "||" + self.dict_cat_cut["MuMu"] + "||" +self.dict_cat_cut["MuEl"] + ")"
         cut_for_SF_channel = "(" + self.dict_cat_cut["ElEl"] + "||" + self.dict_cat_cut["MuMu"] + ")"
         self.dict_cat_cut["SF"] = cut_for_SF_channel
@@ -88,7 +138,7 @@ class BasePlotter:
         # Lepton ID and Iso Scale Factors
         llIdIso_sfIdx = "[0]"
         llIdIso_strCommon = "NOMINAL"
-        llIdIso_sf = "(common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_id_tight[{1}][0] : muon_sf_id_hww[{1}][0]*muon_sf_iso_tight_id_hww[{1}][0], ({0}.isEl) ? electron_sf_id_tight[{1}]{2} : muon_sf_id_hww[{1}]{2}*muon_sf_iso_tight_id_hww[{1}]{2}}}, {{ ({3}.isEl) ? electron_sf_id_tight[{4}][0] : muon_sf_id_hww[{4}][0]*muon_sf_iso_tight_id_hww[{4}][0], ({3}.isEl) ? electron_sf_id_tight[{4}]{2} : muon_sf_id_hww[{4}]{2}*muon_sf_iso_tight_id_hww[{4}]{2} }}}}}}, common::Variation::{5}) )".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
+        llIdIso_sf = "(common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_hww_wp[{1}][0] : muon_sf_id_hww[{1}][0]*muon_sf_iso_tight_id_hww[{1}][0], ({0}.isEl) ? electron_sf_hww_wp[{1}]{2} : muon_sf_id_hww[{1}]{2}*muon_sf_iso_tight_id_hww[{1}]{2}}}, {{ ({3}.isEl) ? electron_sf_hww_wp[{4}][0] : muon_sf_id_hww[{4}][0]*muon_sf_iso_tight_id_hww[{4}][0], ({3}.isEl) ? electron_sf_hww_wp[{4}]{2} : muon_sf_id_hww[{4}]{2}*muon_sf_iso_tight_id_hww[{4}]{2} }}}}}}, common::Variation::{5}) )".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
         # electrons
         if systematic == "elidisoup":
             llIdIso_sfIdx = "[2]" 
@@ -97,7 +147,7 @@ class BasePlotter:
             llIdIso_sfIdx = "[1]"
             llIdIso_strCommon = "DOWN"
         if systematic == "elidisoup" or systematic == "elidisodown":
-            llIdIso_sf = "(common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_id_tight[{1}][0] :muon_sf_id_hww[{1}][0]*muon_sf_iso_tight_id_hww[{1}][0], ({0}.isEl) ? electron_sf_id_tight[{1}]{2} : 0 }}, {{ ({3}.isEl) ? electron_sf_id_tight[{4}][0] :muon_sf_id_hww[{4}][0]*muon_sf_iso_tight_id_hww[{4}][0], ({3}.isEl) ? electron_sf_id_tight[{4}]{2} : 0 }}}}}}, common::Variation::{5}) )".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
+            llIdIso_sf = "(common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_hww_wp[{1}][0] :muon_sf_id_hww[{1}][0]*muon_sf_iso_tight_id_hww[{1}][0], ({0}.isEl) ? electron_sf_hww_wp[{1}]{2} : 0 }}, {{ ({3}.isEl) ? electron_sf_hww_wp[{4}][0] :muon_sf_id_hww[{4}][0]*muon_sf_iso_tight_id_hww[{4}][0], ({3}.isEl) ? electron_sf_hww_wp[{4}]{2} : 0 }}}}}}, common::Variation::{5}) )".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
 
         # muons
         if systematic == "muidup":
@@ -108,7 +158,7 @@ class BasePlotter:
             llIdIso_strCommon="DOWN"
         if systematic == "muidup" or systematic == "muiddown":
             # if we compute muon id error, the muon iso SF should not be inside the combineScaleFactors (above, for electron id error, it can be inside because it won't be use together with the error
-            llIdIso_sf = "((({0}.isEl) ? 1 : muon_sf_iso_tight_id_hww[{1}][0]) * (({3}.isEl) ? 1 : muon_sf_iso_tight_id_hww[{4}][0]) * (common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_id_tight[{1}][0] :muon_sf_id_hww[{1}][0], ({0}.isEl) ? 0. :muon_sf_id_hww[{1}]{2}}}, {{ ({3}.isEl) ? electron_sf_id_tight[{4}][0] :muon_sf_id_hww[{4}][0], ({3}.isEl) ? 0. :muon_sf_id_hww[{4}]{2} }}}}}}, common::Variation::{5}) ))".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
+            llIdIso_sf = "((({0}.isEl) ? 1 : muon_sf_iso_tight_id_hww[{1}][0]) * (({3}.isEl) ? 1 : muon_sf_iso_tight_id_hww[{4}][0]) * (common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_hww_wp[{1}][0] :muon_sf_id_hww[{1}][0], ({0}.isEl) ? 0. :muon_sf_id_hww[{1}]{2}}}, {{ ({3}.isEl) ? electron_sf_hww_wp[{4}][0] :muon_sf_id_hww[{4}][0], ({3}.isEl) ? 0. :muon_sf_id_hww[{4}]{2} }}}}}}, common::Variation::{5}) ))".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
         if systematic == "muisoup":
             llIdIso_sfIdx = "[2]" 
             llIdIso_strCommon="UP"
@@ -116,7 +166,7 @@ class BasePlotter:
             llIdIso_sfIdx = "[1]"
             llIdIso_strCommon="DOWN"
         if systematic == "muisoup" or systematic == "muisodown":
-            llIdIso_sf = "((({0}.isEl) ? 1 : muon_sf_id_hww[{1}][0]) * (({3}.isEl) ? 1 : muon_sf_id_hww[{4}][0]) * (common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_id_tight[{1}][0] :muon_sf_iso_tight_id_hww[{1}][0], ({0}.isEl) ? 0. :muon_sf_iso_tight_id_hww[{1}]{2}}}, {{ ({3}.isEl) ? electron_sf_id_tight[{4}][0] :muon_sf_iso_tight_id_hww[{4}][0], ({3}.isEl) ? 0. :muon_sf_iso_tight_id_hww[{4}]{2} }}}}}}, common::Variation::{5}) ))".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
+            llIdIso_sf = "((({0}.isEl) ? 1 : muon_sf_id_hww[{1}][0]) * (({3}.isEl) ? 1 : muon_sf_id_hww[{4}][0]) * (common::combineScaleFactors<2>({{{{{{({0}.isEl) ? electron_sf_hww_wp[{1}][0] :muon_sf_iso_tight_id_hww[{1}][0], ({0}.isEl) ? 0. :muon_sf_iso_tight_id_hww[{1}]{2}}}, {{ ({3}.isEl) ? electron_sf_hww_wp[{4}][0] :muon_sf_iso_tight_id_hww[{4}][0], ({3}.isEl) ? 0. :muon_sf_iso_tight_id_hww[{4}]{2} }}}}}}, common::Variation::{5}) ))".format(self.lep1_str, self.lep1_fwkIdx, llIdIso_sfIdx, self.lep2_str, self.lep2_fwkIdx, llIdIso_strCommon)
 
         # BTAG SF
         jjBtag_sfIdx = "[0]"
@@ -184,6 +234,9 @@ class BasePlotter:
         self.mjj_vs_bdt_plot = []
 
         self.flavour_plot = []
+        self.jet_tf_plot = []
+        self.mu_tf_plot = []
+        self.el_tf_plot = []
 
         self.llidisoWeight_plot = []
         self.mumuidisoWeight_plot = []
@@ -203,15 +256,19 @@ class BasePlotter:
 
         self.forSkimmer_plot = []
 
-        # Protect against the fact that data do not have jecup collections, in the nominal case we still have to check that data have one candidate 
+        # Protect against the fact that data do not have jecup collections, in the nominal case we still have to check that data have one candidate
         sanityCheck = self.sanityCheck
         if systematic != "nominal":
             sanityCheck = self.joinCuts("!event_is_data", self.sanityCheck)
+        # Trigger matching for data
+        trigerMatching = "(!(%s.hlt_idx == -1 || %s.hlt_idx == -1) || !event_is_data)"%(self.lep1_str, self.lep2_str)
+        
 
         for cat in categories:
 
             catCut = self.dict_cat_cut[cat]
-            self.totalCut = self.joinCuts(sanityCheck, catCut, extraCut, dict_stage_cut[stage])
+            self.totalCut_noFlavour = self.joinCuts(sanityCheck, extraCut, dict_stage_cut[stage], trigerMatching)
+            self.totalCut = self.joinCuts(sanityCheck, catCut, extraCut, dict_stage_cut[stage], trigerMatching)
             self.llFlav = cat
             self.extraString = stage + extraString
 
@@ -250,19 +307,6 @@ class BasePlotter:
                         'binning': '(50, {}, {})'.format(bdtRange[0], bdtRange[1])
                 })
                 
-                # 2D templates: different binnings
-
-                if fit2DtemplatesBinning is None: continue
-
-                for binName, binning in fit2DtemplatesBinning.items():
-
-                    self.mjj_vs_bdt_plot.append({
-                            'name': 'jj_M_vs_MVA_%s_%s_%s_%s_%s%s' % (binName, bdtName, self.llFlav, self.suffix, self.extraString, self.systematicString),
-                            'variable': self.jj_str + ".M() ::: " + BDToutputsVariable[bdtName],
-                            'plot_cut': self.totalCut,
-                            'binning': '(%s, %s, %s, %s)' % (binning["mjjBinning"], binning["bdtNbins"], bdtRange[0], bdtRange[1])
-                    })
-
             # Weight Plots
             self.jjbtagWeight_plot.append(
                         {'name': 'jjbtag_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': available_weights["jjbtag"],
@@ -866,6 +910,228 @@ class BasePlotter:
                     'binning': '(2, 0, 2)'
                 },
             ])
+            self.jet_tf_plot.extend([
+                {     
+                    'name': 'tf_bjet1_matchedToAfterFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.jet1_str),
+                    'binning': '(' + bjet_nBinsX + ', ' + bjet_binningX + ', ' + bjet_nBinsY + ', ' + bjet_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet1_matchedToAfterFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.jet1_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.jet1_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet1_matchedToAfterFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.jet1_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.jet1_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+                {     
+                    'name': 'tf_bjet2_matchedToAfterFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.jet2_str),
+                    'binning': '(' + bjet_nBinsX + ', ' + bjet_binningX + ', ' + bjet_nBinsY + ', ' + bjet_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet2_matchedToAfterFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.jet2_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.jet2_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet2_matchedToAfterFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.jet2_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.jet2_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+                {     
+                    'name': 'tf_bjet1_matchedToBeforeFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.2'%self.jet1_str),
+                    'binning': '(' + bjet_nBinsX + ', ' + bjet_binningX + ', ' + bjet_nBinsY + ', ' + bjet_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet1_matchedToBeforeFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.2'%self.jet1_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.jet1_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet1_matchedToBeforeFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.2'%self.jet1_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.jet1_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+                {     
+                    'name': 'tf_bjet2_matchedToBeforeFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.2'%self.jet2_str),
+                    'binning': '(' + bjet_nBinsX + ', ' + bjet_binningX + ', ' + bjet_nBinsY + ', ' + bjet_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet2_matchedToBeforeFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.2'%self.jet2_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.jet2_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+                {
+                    'name': 'tf_bjet2_matchedToBeforeFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.jet2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.2'%self.jet2_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.jet2_str)),
+                    'binning': '(' + bjet_BA_nBinsX + ', ' + bjet_BA_binningX + ', ' + bjet_BA_nBinsY + ', ' + bjet_BA_binningY + ')',
+                },
+            ])
+            self.mu_tf_plot.extend([
+                {     
+                    'name': 'tf_mu1_matchedToAfterFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep1_str, '%s.isMu'%self.lep1_str),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu1_matchedToAfterFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep1_str, '%s.isMu'%self.lep1_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep1_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu1_matchedToAfterFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep1_str, '%s.isMu'%self.lep1_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep1_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu2_matchedToAfterFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep2_str, '%s.isMu'%self.lep2_str),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu2_matchedToAfterFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep2_str, '%s.isMu'%self.lep2_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep2_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu2_matchedToAfterFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep2_str, '%s.isMu'%self.lep2_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep2_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu1_matchedToBeforeFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep1_str, '%s.isMu'%self.lep1_str),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu1_matchedToBeforeFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep1_str, '%s.isMu'%self.lep1_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep1_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu1_matchedToBeforeFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep1_str, '%s.isMu'%self.lep1_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep1_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu2_matchedToBeforeFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep2_str, '%s.isMu'%self.lep2_str),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu2_matchedToBeforeFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep2_str, '%s.isMu'%self.lep2_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep2_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+                {     
+                    'name': 'tf_mu2_matchedToBeforeFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep2_str, '%s.isMu'%self.lep2_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep2_str)),
+                    'binning': '(' + mu_nBinsX + ', ' + mu_binningX + ', ' + mu_nBinsY + ', ' + mu_binningY + ')',
+                },
+            ])
+            self.el_tf_plot.extend([
+                {     
+                    'name': 'tf_el1_matchedToAfterFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep1_str, '%s.isEl'%self.lep1_str),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el1_matchedToAfterFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep1_str, '%s.isEl'%self.lep1_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep1_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el1_matchedToAfterFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep1_str, '%s.isEl'%self.lep1_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep1_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el2_matchedToAfterFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep2_str, '%s.isEl'%self.lep2_str),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el2_matchedToAfterFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep2_str, '%s.isEl'%self.lep2_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep2_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el2_matchedToAfterFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_matched'%self.lep2_str, '%s.isEl'%self.lep2_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep2_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el1_matchedToBeforeFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep1_str, '%s.isEl'%self.lep1_str),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el1_matchedToBeforeFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep1_str, '%s.isEl'%self.lep1_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep1_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el1_matchedToBeforeFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep1_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep1_str, '%s.isEl'%self.lep1_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep1_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el2_matchedToBeforeFSR_allEta',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep2_str, '%s.isEl'%self.lep2_str),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el2_matchedToBeforeFSR_barrel',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep2_str, '%s.isEl'%self.lep2_str, 'abs({0}.p4.Eta()) <= 1.3'.format(self.lep2_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+                {     
+                    'name': 'tf_el2_matchedToBeforeFSR_endcap',
+                    'variable': '{0}.tt_parton_p4.E() ::: {0}.p4.E() - {0}.tt_parton_p4.E()'.format(self.lep2_str),
+                    'plot_cut': self.joinCuts(self.totalCut, '%s.tt_parton_DR < 0.1'%self.lep2_str, '%s.isEl'%self.lep2_str, 'abs({0}.p4.Eta()) > 1.3'.format(self.lep2_str)),
+                    'binning': '(' + el_nBinsX + ', ' + el_binningX + ', ' + el_nBinsY + ', ' + el_binningY + ')',
+                },
+            ])
             self.vertex_plot.append({
                         'name': 'nPV_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "vertex_n",
@@ -878,6 +1144,7 @@ class BasePlotter:
                         'plot_cut': self.totalCut,
                         'binning': '(100, 0, 800)'
                 })
+
 
 
             self.forSkimmer_plot.extend([
