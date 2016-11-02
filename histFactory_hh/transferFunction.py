@@ -14,4 +14,6 @@ plots = []
 
 basePlotter_lljj = BasePlotter(baseObjectName = 'hh_llmetjj_HWWleptons_nobtag_csv', btagWP_str = 'nobtag', objects = "nominal")
 plots.extend(basePlotter_lljj.generatePlots(["All"], 'no_cut', systematic = 'nominal', weights = [], requested_plots = ["jet_tf", "mu_tf", "el_tf"])) 
+basePlotter_lljj = BasePlotter(baseObjectName = 'hh_llmetjj_HWWleptons_btagM_csv', btagWP_str = 'btagM', objects = "nominal")
+plots.extend(basePlotter_lljj.generatePlots(["All"], 'no_cut', systematic = 'nominal', weights = [], requested_plots = ["jet_tf", "mu_tf", "el_tf"])) 
 

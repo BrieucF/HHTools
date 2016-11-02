@@ -8,12 +8,12 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Facility to produce the yml with plots information.')
 parser.add_argument('--yields', help='If you just want to produce the yields and systematics.', action="store_true")
-parser.add_argument('-d', '--directory', dest='directory', default="76_mjjStudy", help='Directory of the input rootfiles.')
+parser.add_argument('-d', '--directory', dest='directory', default="MIS_RUNII_firstRound", help='Directory of the input rootfiles.')
 parser.add_argument('--blinded', dest='unblinded', help='If you want to produce blinded plots', action="store_false")
 args = parser.parse_args()
 
-baseDir = "/home/fynu/sbrochet/scratch/Framework/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/"
-fileName = baseDir + args.directory + "/condor/output/GluGluToHHTo2B2VTo2L2Nu_node_SM_13TeV-madgraph_v0.1.4+76X_HHAnalysis_2016-06-03.v0_histos.root"
+baseDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/"
+fileName = baseDir + args.directory + "/condor/output/TTTo2L2Nu_13TeV-powheg_Fall15MiniAODv2_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_histos.root"
 
 skim = False
 
@@ -51,6 +51,7 @@ defaultStyle_events.update({
 nHistos = 0
 
 for key in keys:
+    
     if key.GetName() not in alreadyIn and not "__" in key.GetName():
 
         ## Some manual choices which plots to skip...
@@ -78,6 +79,18 @@ for key in keys:
                 'x-axis': key.GetName(),
                 }
         plot['labels'] = []
+
+        # Yields
+        if args.yields:
+            if "isElEl_All_hh_llmetjj_HWWleptons_btagM_csv_no_cut" in key.GetName():
+                plot['x-axis'] = "isElEl"
+                plot['for-yields'] = True
+                plot.update(defaultStyle_events_per_gev)
+                plots[key.GetName()] = plot
+                nHistos += 1
+                break
+            else:
+                continue
 
         if "lep1_pt" in key.GetName():
             plot['x-axis'] = "Leading lepton p_{T} (GeV)"
@@ -226,11 +239,11 @@ for key in keys:
         elif "ll_M_" in key.GetName():
             plot['x-axis'] = "m_{ll} (GeV)"
             plot.update(defaultStyle_events_per_gev)
-            if "mll_cut" in key.GetName():
-                plot['x-axis-range'] = [10, 76]
-                if "btagM" in key.GetName(): #### Do the yields here
-                    plot['for-yields'] = True
-                    plot['yields-title'] = "llbb, mll cut"
+            #if "mll_cut" in key.GetName():
+            #    plot['x-axis-range'] = [10, 76]
+            #    if "btagM" in key.GetName(): #### Do the yields here
+            #        plot['for-yields'] = True
+            #        plot['yields-title'] = "llbb, mll cut"
         
         elif "jj_M_" in key.GetName() and "_vs_" not in key.GetName():
             plot['x-axis'] = "m_{jj} (GeV)"

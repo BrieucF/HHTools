@@ -26,12 +26,11 @@ def get_sample(iSample):
     return resultset.one()
 
 IDs = [
-        2032, # TT fully lep
-        2051, # TT inclusive
+        #2157, # TT fully lep
+        2158, # TT inclusive
 #        2037, # DY M-50 no ext
         ]
-IDsToSplitMore = []
-IDsToSplitMore.append(2051)
+IDsToSplitMore = [2157]
 
 parser = argparse.ArgumentParser(description='Facility to submit histFactory jobs on condor.')
 parser.add_argument('-o', '--output', dest='output', default=str(datetime.date.today()), help='Name of the output directory.')
@@ -61,9 +60,9 @@ if args.test:
 
 samples = []
 for ID in IDs + IDsToSplitMore:
-    filesperJob = 15
+    filesperJob = 4
     if ID in IDsToSplitMore:
-        filesperJob = 5
+        filesperJob = 1
     samples.append(
         {
             "ID": ID,
