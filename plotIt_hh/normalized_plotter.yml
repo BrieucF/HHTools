@@ -1,0 +1,27 @@
+configuration:
+    include: ['centralConfig.yml']
+
+files:
+    include: ['normalized_MCFiles.yml']
+
+plots:
+    include: ['allPlots.yml']
+
+groups:
+  include: ['groups.yml']
+
+legend:
+  include: ['normalized_legendPosition.yml']
+
+#systematics:
+#  - lumi: 1.027
+#  - pu
+#  - elidiso
+#  - muiso
+#  - muid
+#  - jjbtag
+#  - jec
+#  - jer 
+#  - trigeff
+#  - scaleUncorr
+#  - pdf

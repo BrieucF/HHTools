@@ -1162,25 +1162,25 @@ class BasePlotter:
                         'name': name+'_minLog_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "-log10({0}_weights.at(0).first)".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(60, 10, 40)'
+                        'binning': '(80, 10, 40)'
                         }, 
                         {
                         'name': name+'_minLog_weight_up_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "-log10({0}_weights.at(0).first + {0}_weights.at(0).second)".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(60, 10, 40)'
+                        'binning': '(80, 10, 40)'
                         }, 
                         {
                         'name': name+'_minLog_weight_down_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "-log10({0}_weights.at(0).first - {0}_weights.at(0).second)".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(60, 10, 40)'
+                        'binning': '(80, 10, 40)'
                         }, 
                         {
                         'name': name+'_weightRelError_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "{0}_weights.at(0).second / {0}_weights.at(0).first".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(120, 0, 120)'
+                        'binning': '(100, 0, 1)'
                         },
                         {
                         'name': name+'_IntegStatus_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
@@ -1195,13 +1195,13 @@ class BasePlotter:
                         'name': name+'_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "{0}_weights.at(0).first".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(65, 0, 1)'
+                        'binning': '(80, 0, 1)'
                         },
                         {
                         'name': name+'_weightError_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "{0}_weights.at(0).second".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(60, 10, 40)'
+                        'binning': '(80, 10, 40)'
                         }
                         ]
             #self.momemta_weights_plot.extend(generateWeightPlot('pp_Z_llbb_tfJetAllEta_simple'))
