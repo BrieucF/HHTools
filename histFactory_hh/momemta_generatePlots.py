@@ -15,15 +15,18 @@ weights_llbb = ['trigeff', 'llidiso', 'pu', 'jjbtag']
 flavour = "ElEl" # Careful! only one is allow otherwise the check "if (%s) {\n"%basePlotter.totalCut" is not fullfilled in the in_loop_code
 categories_llbb = [flavour]
 stage_llbb = "no_cut"
-plots_llbb = ["momemta_weights", "basic", "flavour", "mll", "mjj"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
+#plots_llbb = ["momemta_weights", "basic", "flavour", "mll", "mjj"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
+plots_llbb = ["momemta_weights"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
 plots.extend(basePlotter.generatePlots(categories_llbb, stage_llbb, systematic = "nominal", weights = weights_llbb, requested_plots = plots_llbb))
 
 # Needed for momemta weights computation
 includes = []
 includes.append("<momemta/ConfigurationReader.h>")
 includes.append("<momemta/MoMEMta.h>")
+includes.append("<chrono>")
 libraries = ["/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta/build/install/lib/libmomemta.so"]
 code_before_loop = """
+    using namespace std::chrono;\n
     ParameterSet dy_lua_parameters;\n
 """
 #dy_lua_parameters.set("matrix_element_prefix", "pp_to_Z_to_llbb"); //  pp_to_llbb, gg_to_z_to_llbb, pp_to_Z_to_llbb
@@ -42,9 +45,6 @@ baseGlobalParameters = {
         #"lep2TFName":"ERecMinEGenVSEGen_el_matchedToAfterFSR_allEta_Norm_hh_llmetjj_HWWleptons_nobtag_csv",
         #"jet1TFName":"ERecMinEGenVSEGen_bjet_matchedToAfterFSR_allEta_Norm_hh_llmetjj_HWWleptons_nobtag_csv",
         #"jet2TFName":"ERecMinEGenVSEGen_bjet_matchedToAfterFSR_allEta_Norm_hh_llmetjj_HWWleptons_nobtag_csv",
-
-        #"lep1_me_index":1,
-        #"lep2_me_index":2,
 
         "matrix_element":"pp_to_Z_to_llbb_sm_P1_Sigma_sm_gg_epembbx",
         "matrix_element_parameters":MatrixElementDir+"/pp_to_Z_to_llbb/Cards/param_card.dat",
@@ -73,22 +73,13 @@ tf_categories = {
         }
 
 code_in_loop_per_category = {
-        "pm" : {
             "elel": [],
             "muel": [],
             "mumu": [],
             "elmu": [],
-        },
-        "mp" : {
-            "elel": [],
-            "muel": [],
-            "mumu": [],
-            "elmu": [],
-        }
 }
 
-def newConfig(name, luaConfig, globalParameters, plusMinusLepIdxs = [1, 2], computeWeight_input = "{p1, p2, p3, p4, balanced_p4}, met", tf_categories=tf_categories, prefixLuaParameters="dy"):
-    # NB : plusMinusLepIdxs refers to the lep indexes in case first lepton is a plus charged lepton
+def newConfig(name, luaConfig, globalParameters, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, isr}, met", tf_categories=tf_categories, prefixLuaParameters="dy"):
     global code_before_loop
     global code_in_loop_per_category
     global basePlotter
@@ -99,54 +90,35 @@ def newConfig(name, luaConfig, globalParameters, plusMinusLepIdxs = [1, 2], comp
     code_before_loop += "    std::vector<std::pair<double, double>> %s;\n"%(weightsName)
     weightsIntegStatusName = name + "_integStatus"
     code_before_loop += "    bool %s;\n"%(weightsIntegStatusName)
+    weightsTimeName = name + "_time"
+    weightsStartTimeName = name + "_startTime"
+    weightsEndTimeName = name + "_endTime"
+    code_before_loop += "    auto %s = system_clock::now();\n"%(weightsStartTimeName)
+    code_before_loop += "    auto %s = system_clock::now();\n"%(weightsEndTimeName)
+    code_before_loop += "    double %s;\n"%(weightsTimeName)
     lua_parameterSetName = "%s_lua_parameters"%prefixLuaParameters
     code_before_loop += "    " + lua_parameterSetName + """.set("matrix_element_prefix", "%s");\n"""%(globalParameters["matrix_element_prefix"])
-    # Lep +, Lep - scenario :
-    code_before_loop += """    %s.set("%s", %s);\n""" % (lua_parameterSetName, "lep1_me_index", plusMinusLepIdxs[0])
-    code_before_loop += """    %s.set("%s", %s);\n""" % (lua_parameterSetName, "lep2_me_index", plusMinusLepIdxs[1])
-    name_withSign = name + "_pm"
-    configReaderName =  "%s_configuration" % name_withSign
+    configReaderName =  "%s_configuration" % name
     code_before_loop += """    ConfigurationReader %s("%s", %s_lua_parameters);\n""" % (configReaderName, luaConfig, prefixLuaParameters)
     for parameter in globalParameters.keys():
-        if "me_index" in parameter: #should not happen anymore
-            code_before_loop += """    %s.getGlobalParameters().set("%s", %s);\n""" % (configReaderName, parameter, globalParameters[parameter])
-        else:
-            code_before_loop += """    %s.getGlobalParameters().set("%s", "%s");\n""" % (configReaderName, parameter, globalParameters[parameter])
+        code_before_loop += """    %s.getGlobalParameters().set("%s", "%s");\n""" % (configReaderName, parameter, globalParameters[parameter])
     for category in tf_categories:
         # Set the proper tf for elel, mumu etc. One config for all tf category, just modify relevant params.
-        nameWithFlavour = name_withSign + "_" + category
+        nameWithFlavour = name + "_" + category
         code_before_loop += "\n"
         for tfentry in tf_categories[category]:
             code_before_loop += """    %s.getGlobalParameters().set("%s", "%s");\n""" % (configReaderName, tfentry, tf_categories[category][tfentry])
         weightComputerName = "%s_weightComputer"%nameWithFlavour
         code_before_loop += """\n    MoMEMta %s(%s.freeze());\n\n""" % (weightComputerName, configReaderName)
-        code_in_loop_per_category["pm"][category].append("            %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
-        code_in_loop_per_category["pm"][category].append("            %s = (%s.getIntegrationStatus() != MoMEMta::IntegrationStatus::SUCCESS);\n"% (weightsIntegStatusName, weightComputerName))
-        code_in_loop_per_category["pm"][category].append("            if (%s.at(0).first == 0) %s = { std::make_pair(std::numeric_limits<double>::min(), 0) };\n"% (weightsName, weightsName))
-        code_in_loop_per_category["pm"][category].append("\n")
-    # Lep -, Lep + scenario :
-    code_before_loop += """    %s.set("%s", %s);\n""" % (lua_parameterSetName, "lep1_me_index", plusMinusLepIdxs[1])
-    code_before_loop += """    %s.set("%s", %s);\n""" % (lua_parameterSetName, "lep2_me_index", plusMinusLepIdxs[0])
-    name_withSign = name + "_mp"
-    configReaderName =  "%s_configuration" % name_withSign
-    code_before_loop += """    ConfigurationReader %s("%s", %s_lua_parameters);\n""" % (configReaderName, luaConfig, prefixLuaParameters)
-    for parameter in globalParameters.keys():
-        if "me_index" in parameter: #should not happen anymore
-            code_before_loop += """    %s.getGlobalParameters().set("%s", %s);\n""" % (configReaderName, parameter, globalParameters[parameter])
-        else:
-            code_before_loop += """    %s.getGlobalParameters().set("%s", "%s");\n""" % (configReaderName, parameter, globalParameters[parameter])
-    for category in tf_categories:
-        # Set the proper tf for elel, mumu etc. One config for all tf category, just modify relevant params.
-        nameWithFlavour = name_withSign + "_" + category
-        code_before_loop += "\n"
-        for tfentry in tf_categories[category]:
-            code_before_loop += """    %s.getGlobalParameters().set("%s", "%s");\n""" % (configReaderName, tfentry, tf_categories[category][tfentry])
-        weightComputerName = "%s_weightComputer"%nameWithFlavour
-        code_before_loop += """\n    MoMEMta %s(%s.freeze());\n\n""" % (weightComputerName, configReaderName)
-        code_in_loop_per_category["mp"][category].append("              %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
-        code_in_loop_per_category["mp"][category].append("              %s = (%s.getIntegrationStatus() != MoMEMta::IntegrationStatus::SUCCESS);\n"% (weightsIntegStatusName, weightComputerName))
-        code_in_loop_per_category["mp"][category].append("              if (%s.at(0).first == 0) %s = { std::make_pair(std::numeric_limits<double>::min(), 0) };\n"% (weightsName, weightsName))
-        code_in_loop_per_category["mp"][category].append("\n")
+#        code_in_loop_per_category[category].append("""          std::cout << "Start computing weight %s" << std::endl;\n"""% (nameWithFlavour))
+        code_in_loop_per_category[category].append("""          %s = system_clock::now();\n"""%weightsStartTimeName)
+        code_in_loop_per_category[category].append("            %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
+        code_in_loop_per_category[category].append("""          %s = system_clock::now();\n"""%weightsEndTimeName)
+        code_in_loop_per_category[category].append("""          %s = (std::chrono::duration_cast<seconds>(%s - %s).count())/60.0;\n"""%(weightsTimeName, weightsEndTimeName, weightsStartTimeName))
+        code_in_loop_per_category[category].append("            %s = (%s.getIntegrationStatus() == MoMEMta::IntegrationStatus::SUCCESS);\n"%(weightsIntegStatusName, weightComputerName))
+        code_in_loop_per_category[category].append("            if (%s.at(0).first == 0) %s = { std::make_pair(std::numeric_limits<double>::min(), 0) };\n"% (weightsName, weightsName))
+        code_in_loop_per_category[category].append("""          std::cout << "Computed weight %s : " << %s.at(0).first << " +- " << %s.at(0).second << " in " << %s << " min." << std::endl;\n"""% (nameWithFlavour, weightsName, weightsName, weightsTimeName))
+        code_in_loop_per_category[category].append("\n")
 
 #newConfig("dy_tradeElep2ForZMass_Jet_ba_ec_Ele_ba_Mu_ba", {} , "dy")
 #weight_dict = {
@@ -160,13 +132,19 @@ def newConfig(name, luaConfig, globalParameters, plusMinusLepIdxs = [1, 2], comp
 # DY weight
 #newConfig("pp_Z_llbb_TFCATEG_tfJetAllEta_simple", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/dy_to_ll_simple.lua", baseGlobalParameters)
 
-# TT weight
-parameters_pp_tt_llbb = copy.deepcopy(baseGlobalParameters)
-parameters_pp_tt_llbb["matrix_element_parameters"] = MatrixElementDir+"/pp_to_tt_to_lvlvbb/Cards/param_card.dat"
-parameters_pp_tt_llbb["matrix_element_prefix"] = "pp_to_tt_to_lvlvbb"
-parameters_pp_tt_llbb["matrix_element"] = "pp_to_tt_to_lvlvbb_sm_P1_Sigma_sm_gg_emvexepvebbx"
-newConfig("pp_tt_llbb_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/tt_fullyleptonic_custom.lua", parameters_pp_tt_llbb, plusMinusLepIdxs = [3, 1], computeWeight_input = "{p1, p2, p3, p4}, met")
+## TT weight
+#parameters_pp_tt_llbb = copy.deepcopy(baseGlobalParameters)
+#parameters_pp_tt_llbb["matrix_element_parameters"] = MatrixElementDir+"/pp_to_tt_to_lvlvbb/Cards/param_card.dat"
+#parameters_pp_tt_llbb["matrix_element_prefix"] = "pp_to_tt_to_lvlvbb"
+#parameters_pp_tt_llbb["matrix_element"] = "pp_to_tt_to_lvlvbb_sm_P1_Sigma_sm_gg_emvexepvebbx"
+#newConfig("pp_tt_llbb_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/tt_fullyleptonic_custom.lua", parameters_pp_tt_llbb, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2}, met")
 
+# tW- weight
+parameters_twminus = copy.deepcopy(baseGlobalParameters)
+parameters_twminus["matrix_element_parameters"] = MatrixElementDir+"/pp_twMinusbbar_tAndWOnshell/Cards/param_card.dat"
+parameters_twminus["matrix_element_prefix"] = "pp_twMinusbbar_tAndWOnshell"
+parameters_twminus["matrix_element"] = "pp_twMinusbbar_tAndWOnshell_sm_P1_Sigma_sm_gg_mupvmbmumvmxbx"
+newConfig("twminus_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/twMinusbbar.lua", parameters_twminus, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, dummy_neutrino}, met")
 ## ZZ weights
 #parameters_pp_zz_llbb_simple = copy.deepcopy(baseGlobalParameters)
 #parameters_pp_zz_llbb_simple["matrix_element_parameters"] = MatrixElementDir+"/pp_to_zz_to_llbb/Cards/param_card.dat"
@@ -226,66 +204,64 @@ newConfig("pp_tt_llbb_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_
 #"""
 
 code_in_loop += "   if (%s) {\n"%basePlotter.totalCut
-code_in_loop += "       LorentzVector p1(%s.p4);\n"%basePlotter.lep1_str
-code_in_loop += "       LorentzVector p2(%s.p4);\n"%basePlotter.lep2_str
-code_in_loop += "       const double lepMass = 0.0001;\n"
-code_in_loop += "       const double modifFactor_p1 = std::sqrt((p1.E() - lepMass) * (p1.E() + lepMass)) / p1.P();\n"
-code_in_loop += "       p1.SetPxPyPzE(modifFactor_p1 * p1.Px(), modifFactor_p1 * p1.Py(), modifFactor_p1 * p1.Pz(), p1.E());\n"
-code_in_loop += "       const double modifFactor_p2 = std::sqrt((p2.E() - lepMass) * (p2.E() + lepMass)) / p2.P();\n"
-code_in_loop += "       p2.SetPxPyPzE(modifFactor_p2 * p2.Px(), modifFactor_p2 * p2.Py(), modifFactor_p2 * p2.Pz(), p2.E());\n"
-code_in_loop += "       LorentzVector p3(%s.p4);\n"%basePlotter.jet1_str
-code_in_loop += "       LorentzVector p4(%s.p4);\n"%basePlotter.jet2_str
-code_in_loop += "       LorentzVector balanced_p4 = p1+p2+p3+p4;\n"
-code_in_loop += "       balanced_p4.SetPxPyPzE(-balanced_p4.Px(), -balanced_p4.Py(), -balanced_p4.Pz(), balanced_p4.E());\n"
-code_in_loop += "       LorentzVector met(%s);\n"%basePlotter.met_str
-
-# Minus Plus scenario
+code_in_loop += "       LorentzVector neg_lepton_p4;\n"
+code_in_loop += "       LorentzVector pos_lepton_p4;\n"
 code_in_loop += "       if (%s.charge == -1) {\n"%basePlotter.lep1_str
-
-code_in_loop += "           if (%s.isEl && %s.isEl){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["mp"]["elel"] :
-    code_in_loop += line
-code_in_loop += "           }\n\n"
-# MuEl
-code_in_loop += "           if (%s.isMu && %s.isEl){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["mp"]["muel"] :
-    code_in_loop += line
-code_in_loop += "           }\n\n"
-# MuMu
-code_in_loop += "           if (%s.isMu && %s.isMu){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["mp"]["mumu"] :
-    code_in_loop += line
-code_in_loop += "           }\n\n"
-# ElMu
-code_in_loop += "           if (%s.isEl && %s.isMu){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["mp"]["elmu"] :
-    code_in_loop += line
-code_in_loop += "           }\n"
-
-code_in_loop += "       }\n"
-
-# Plus Minus scenario
+code_in_loop += "           neg_lepton_p4 = %s.p4;\n"%basePlotter.lep1_str
+code_in_loop += "           pos_lepton_p4 = %s.p4;\n"%basePlotter.lep2_str
+code_in_loop += "       }\n\n"
 code_in_loop += "       else {\n"
-code_in_loop += "           if (%s.isEl && %s.isEl){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["pm"]["elel"] :
+code_in_loop += "           neg_lepton_p4 = %s.p4;\n"%basePlotter.lep2_str
+code_in_loop += "           pos_lepton_p4 = %s.p4;\n"%basePlotter.lep1_str
+code_in_loop += "       }\n\n"
+
+code_in_loop += "       const double lepMass = 0.0001;\n"
+code_in_loop += "       const double modifFactor_neg_lepton_p4 = std::sqrt((neg_lepton_p4.E() - lepMass) * (neg_lepton_p4.E() + lepMass)) / neg_lepton_p4.P();\n"
+code_in_loop += "       neg_lepton_p4.SetPxPyPzE(modifFactor_neg_lepton_p4 * neg_lepton_p4.Px(), modifFactor_neg_lepton_p4 * neg_lepton_p4.Py(), modifFactor_neg_lepton_p4 * neg_lepton_p4.Pz(), neg_lepton_p4.E());\n"
+code_in_loop += "       const double modifFactor_pos_lepton_p4 = std::sqrt((pos_lepton_p4.E() - lepMass) * (pos_lepton_p4.E() + lepMass)) / pos_lepton_p4.P();\n"
+code_in_loop += "       pos_lepton_p4.SetPxPyPzE(modifFactor_pos_lepton_p4 * pos_lepton_p4.Px(), modifFactor_pos_lepton_p4 * pos_lepton_p4.Py(), modifFactor_pos_lepton_p4 * pos_lepton_p4.Pz(), pos_lepton_p4.E());\n"
+
+code_in_loop += "       const double bjetMass = 4.2;\n"
+code_in_loop += "       LorentzVector bjet1_p4(%s.p4);\n"%basePlotter.jet1_str
+code_in_loop += "       const double modifFactor_bjet1_p4 = std::sqrt((bjet1_p4.E() - lepMass) * (bjet1_p4.E() + lepMass)) / bjet1_p4.P();\n"
+code_in_loop += "       bjet1_p4.SetPxPyPzE(modifFactor_bjet1_p4 * bjet1_p4.Px(), modifFactor_bjet1_p4 * bjet1_p4.Py(), modifFactor_bjet1_p4 * bjet1_p4.Pz(), bjet1_p4.E());\n"
+code_in_loop += "       LorentzVector bjet2_p4(%s.p4);\n"%basePlotter.jet2_str
+code_in_loop += "       const double modifFactor_bjet2_p4 = std::sqrt((bjet2_p4.E() - lepMass) * (bjet2_p4.E() + lepMass)) / bjet2_p4.P();\n"
+code_in_loop += "       bjet2_p4.SetPxPyPzE(modifFactor_bjet2_p4 * bjet2_p4.Px(), modifFactor_bjet2_p4 * bjet2_p4.Py(), modifFactor_bjet2_p4 * bjet2_p4.Pz(), bjet2_p4.E());\n"
+code_in_loop += "       LorentzVector minus_isr_p4 = neg_lepton_p4+pos_lepton_p4+bjet1_p4+bjet2_p4;\n"
+code_in_loop += "       LorentzVector isr_p4;\n"
+code_in_loop += "       isr_p4.SetPxPyPzE(-minus_isr_p4.Px(), -minus_isr_p4.Py(), -minus_isr_p4.Pz(), minus_isr_p4.E());\n"
+
+code_in_loop += """       LorentzVector met(%s);\n"""%basePlotter.met_str
+code_in_loop += """       Particle pos_lepton { "pos_lepton", pos_lepton_p4, -11 };"""
+code_in_loop += """       Particle neg_lepton { "neg_lepton", neg_lepton_p4, 11 };"""
+code_in_loop += """       Particle bjet1 { "bjet1", bjet1_p4, 5 };"""
+code_in_loop += """       Particle bjet2 { "bjet2", bjet2_p4, -5 };"""
+code_in_loop += """       Particle isr { "isr", isr_p4, 0 };"""
+code_in_loop += """       Particle dummy_neutrino { "dummy_neutrino", LorentzVector(1,0,0,1), 0 };\n"""
+
+code_in_loop += "       if (%s.isEl && %s.isEl){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
+for line in code_in_loop_per_category["elel"] :
     code_in_loop += line
-code_in_loop += "           }\n\n"
-# MuEl
-code_in_loop += "           if (%s.isMu && %s.isEl){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["pm"]["muel"] :
-    code_in_loop += line
-code_in_loop += "           }\n\n"
-# MuMu
-code_in_loop += "           if (%s.isMu && %s.isMu){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["pm"]["mumu"] :
-    code_in_loop += line
-code_in_loop += "           }\n\n"
-# ElMu
-code_in_loop += "           if (%s.isEl && %s.isMu){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
-for line in code_in_loop_per_category["pm"]["elmu"] :
-    code_in_loop += line
-code_in_loop += "           }\n"
 code_in_loop += "       }\n"
+# MuEl
+code_in_loop += "       if (%s.isMu && %s.isEl){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
+for line in code_in_loop_per_category["muel"] :
+    code_in_loop += line
+code_in_loop += "       }\n\n"
+# MuMu
+code_in_loop += "       if (%s.isMu && %s.isMu){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
+for line in code_in_loop_per_category["mumu"] :
+    code_in_loop += line
+code_in_loop += "       }\n\n"
+# ElMu
+code_in_loop += "        if (%s.isEl && %s.isMu){\n\n"%(basePlotter.lep1_str, basePlotter.lep2_str)
+for line in code_in_loop_per_category["elmu"] :
+    code_in_loop += line
+code_in_loop += "       }\n"
+code_in_loop += "   }\n\n"#sanity check ends here
+
+
 #code_in_loop += "       std::cout << p1 << std::endl;\n"
 #code_in_loop += "       std::cout << p2 << std::endl;\n"
 #code_in_loop += "       std::cout << p3 << std::endl;\n"
@@ -293,7 +269,6 @@ code_in_loop += "       }\n"
 #code_in_loop += "       std::cout << -(p1+p2+p3+p4) << std::endl;\n"
 # ElEl
 #code_in_loop += "       }\n"
-code_in_loop += "   }\n\n"#sanity check ends here
 
 #code_in_loop += """
 #                    if (%s.isEl && %s.isEl) {\n
