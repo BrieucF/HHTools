@@ -26,7 +26,8 @@ def get_sample(iSample):
     return resultset.one()
 
 IDs = [2152]# 2133, 2040] # DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4,DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_ext4_Fall15MiniAODv2_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3 ZZTo2L2Q_13TeV_amcatnloFXFX_madspin_pythia8_Fall15MiniAODv2_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3 
-IDsToSplitMore = [2032] ## TTFL
+IDsToSplitMore = [2032, 2050, 2068] ## TTFL, singletop
+IDfullStat = [2050, 2068]
 
 #IDsToSplitMore.append(2152) ## DY
 
@@ -67,6 +68,9 @@ IDsToSplitMore = [2032] ## TTFL
 #IDs.remove(2142)
 #IDs.remove(2150)
 
+# Stop 
+#IDs.extend([2286, 2288]) # crab_SMS-T2tt_mStop-500_mLSP-325_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Fall15MiniAODv2.py &&  crab_SMS-T2tt_mStop-850_mLSP-100_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_Fall15MiniAODv2.py
+
 parser = argparse.ArgumentParser(description='Facility to submit histFactory jobs on condor.')
 parser.add_argument('-o', '--output', dest='output', default=str(datetime.date.today()), help='Name of the output directory.')
 parser.add_argument('-s', '--submit', help='Choice to actually submit the jobs or not.', action="store_true")
@@ -102,6 +106,8 @@ for ID in IDs + IDsToSplitMore:
         filesperJob = 1
         eventsPerJob = 500
         sample_fraction = 0.07
+    if ID in IDfullStat :
+        sample_fraction = 1.
     samples.append(
         {
             "ID": ID,
