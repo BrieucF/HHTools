@@ -51,7 +51,7 @@ el_nBinsY = str(len(el_binningY)-1)
 el_binningY = "{" + str(el_binningY).strip("[").strip("]") + "}"
 
 class BasePlotter:
-    def __init__(self, baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "nominal", WP = ["T", "T", "T", "T", "L", "L", "M", "M", "csv"]):
+    def __init__(self, baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "nominal"):
         # systematic should be jecup, jecdown, jerup or jerdown. The one for lepton, btag, etc, have to be treated with the "weight" parameter in generatePlots.py (so far)
 
         self.baseObject = baseObjectName+"[0]"
@@ -130,7 +130,7 @@ class BasePlotter:
         self.dict_cat_cut =  {
             "ElEl": "({0}.isElEl && ((hh_elel_fire_trigger_Ele17_Ele12_cut || runOnMC) && (runOnElEl || runOnMC) && {1}.M() > 12))".format(self.baseObject, self.ll_str),
             "MuMu": "({0}.isMuMu && (hh_mumu_fire_trigger_Mu17_Mu8_cut || hh_mumu_fire_trigger_Mu17_TkMu8_cut || runOnMC) && (runOnMuMu || runOnMC) && {1}.M() > 12)".format(self.baseObject, self.ll_str),
-            "MuEl": "((({0}.isElMu && (hh_elmu_fire_trigger_Mu8_Ele17_cut || runOnMC)) || ({0}.isMuEl && (hh_muel_fire_trigger_Mu17_Ele12_cut || runOnMC))) && (runOnElMu || runOnMC) && {1}.M() > 12)".format(self.baseObject, self.ll_str)
+            "MuEl": "(({0}.isElMu || {0}.isMuEl) && (hh_elmu_fire_trigger_Mu8_Ele17_cut || hh_muel_fire_trigger_Mu17_Ele12_cut || runOnMC) && (runOnElMu || runOnMC) && {1}.M() > 12)".format(self.baseObject, self.ll_str)
                         }
         cut_for_All_channel = "(" + self.dict_cat_cut["ElEl"] + "||" + self.dict_cat_cut["MuMu"] + "||" +self.dict_cat_cut["MuEl"] + ")"
         cut_for_SF_channel = "(" + self.dict_cat_cut["ElEl"] + "||" + self.dict_cat_cut["MuMu"] + ")"
@@ -1188,6 +1188,12 @@ class BasePlotter:
                         'plot_cut': self.totalCut,
                         'binning': '(2, 0, 2)'
                         },
+                        {
+                        'name': name+'_time_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': "{0}_time".format(name),
+                        'plot_cut': self.totalCut,
+                        'binning': '(90, 0, 3)'
+                        },
                         ]
             def generateWeightPlot_skimmer(name):
                 return [
@@ -1204,16 +1210,18 @@ class BasePlotter:
                         'binning': '(80, 10, 40)'
                         }
                         ]
-            #self.momemta_weights_plot.extend(generateWeightPlot('pp_Z_llbb_tfJetAllEta_simple'))
-            #self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_Z_llbb_tfJetAllEta_simple'))
+            self.momemta_weights_plot.extend(generateWeightPlot('pp_Z_llbb_simple_tfJetAllEta'))
+            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_Z_llbb_simple_tfJetAllEta'))
+            self.momemta_weights_plot.extend(generateWeightPlot('pp_zz_llbb_simple_tfJetAllEta'))
+            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_zh_llbb_simple_tfJetAllEta'))
+            self.momemta_weights_plot.extend(generateWeightPlot('pp_zh_llbb_simple_tfJetAllEta'))
+            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_zz_llbb_simple_tfJetAllEta'))
             self.momemta_weights_plot.extend(generateWeightPlot('pp_tt_llbb_tfJetAllEta'))
             self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_tt_llbb_tfJetAllEta'))
-            #self.momemta_weights_plot.extend(generateWeightPlot('pp_zz_llbb_blockG_tfJetAllEta'))
-            #self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_zz_llbb_blockG_tfJetAllEta'))
-            #self.momemta_weights_plot.extend(generateWeightPlot('pp_zz_llbb_SBCDblockA_tfJetAllEta'))
-            #self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_zz_llbb_SBCDblockA_tfJetAllEta'))
-            #self.momemta_weights_plot.extend(generateWeightPlot('pp_zz_llbb_simple_tfJetAllEta'))
-            #self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_zz_llbb_simple_tfJetAllEta'))
+            self.momemta_weights_plot.extend(generateWeightPlot('twminus_tfJetAllEta'))
+            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('twminus_tfJetAllEta'))
+            self.momemta_weights_plot.extend(generateWeightPlot('twplus_tfJetAllEta'))
+            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('twplus_tfJetAllEta'))
             self.mis_plot.extend([
                         {
                         'name': 'nExtraJet_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),

@@ -4,6 +4,7 @@ import copy, sys, os, inspect
 # Usage from histFactory/plots/HHAnalysis/ : ./../../build/createHistoWithMultiDraw.exe -d ../../samples.json generatePlots.py 
 scriptDir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 sys.path.append(scriptDir)
+sys.path.append(os.path.join(scriptDir, "../histFactory_hh"))
 from basePlotter import *
 from HHAnalysis import HH
 
@@ -11,25 +12,45 @@ from HHAnalysis import HH
 plots = []
 # llbb 
 basePlotter = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "nominal")
-weights_llbb = ['trigeff', 'llidiso', 'pu', 'jjbtag']
-flavour = "ElEl" # Careful! only one is allow otherwise the check "if (%s) {\n"%basePlotter.totalCut" is not fullfilled in the in_loop_code
+weights_llbb = []
+flavour = "All" # Careful! only one is allow otherwise the check "if (%s) {\n"%basePlotter.totalCut" is not fullfilled in the in_loop_code
 categories_llbb = [flavour]
 stage_llbb = "no_cut"
 #plots_llbb = ["momemta_weights", "basic", "flavour", "mll", "mjj"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
-plots_llbb = ["momemta_weights"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
+plots_llbb = ["momemta_weights", "momemta_weights_skimmer"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
 plots.extend(basePlotter.generatePlots(categories_llbb, stage_llbb, systematic = "nominal", weights = weights_llbb, requested_plots = plots_llbb))
 
+tree = {}
+tree["name"] = "t"
+tree["cut"] = basePlotter.totalCut
+tree["branches"] = []
+tree["clone"] = True
+
+for plot in plots :
+    branch = {}
+    branch["name"] = plot["name"].split("_"+flavour)[0]
+    branch["variable"] = plot["variable"]
+    tree["branches"].append(branch)
+    
+for banch in tree["branches"] :
+    print banch
+
 # Needed for momemta weights computation
-includes = []
-includes.append("<momemta/ConfigurationReader.h>")
-includes.append("<momemta/MoMEMta.h>")
-includes.append("<chrono>")
-libraries = ["/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta/build/install/lib/libmomemta.so"]
+include_directories = []
+include_directories.append(os.path.join(scriptDir, "..", "common"))
+include_directories.append("/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta/include/")
+headers = []
+headers.append("momemta/ConfigurationReader.h")
+headers.append("momemta/MoMEMta.h")
+headers.append("chrono")
+libraries = ['momemta']
+library_directories = ["/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta/build/install/lib/"]
 code_before_loop = """
     using namespace std::chrono;\n
     using namespace momemta;\n
     ParameterSet dy_lua_parameters;\n
 """
+extra_branches = ["hh_llmetjj_HWWleptons_btagM_csv", "hh_leptons", "hh_jets", "event_is_data"]
 #dy_lua_parameters.set("matrix_element_prefix", "pp_to_Z_to_llbb"); //  pp_to_llbb, gg_to_z_to_llbb, pp_to_Z_to_llbb
 
 #matrix_element_prefix = "pp_to_Z_to_llbb"
