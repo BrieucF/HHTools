@@ -5,7 +5,11 @@ experiment: "CMS"
 extra-label: "Preliminary"
 
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/MIS_RUNII_firstRound/condor/output/'
-root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/firstTTbarAndZZWeights/condor/output/'
+#root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/singleTopWeigt_v1/condor/output/'
+#root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/5f_singleTopWeigt_v0_checkPermutation_noAddBjetBoost_moreTW/condor/output/'
+root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/singleTop_NoadditionalObjectInBlockB/condor/output/'
+#root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/firstTTbarAndZZWeights/condor/output/'
+#root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/ttWeight_noTF_NWAtrue_more/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/refix_ttweights/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/16_10_13_momInHistFactory_reretry/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/checkTFEtaBinnedInterest/condor/output/'
@@ -15,7 +19,5 @@ luminosity: 2300  # according to brilcalc
 luminosity-error: 0.
 blinded-range-fill-color: "16" #"#29556270"
 blinded-range-fill-style: 3004
-line-width: 2.7
-line-type: 0
 
 yields-table-align: v

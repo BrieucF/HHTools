@@ -35,8 +35,6 @@ defaultStyle = {
         'show-overflow': True,
         'show-errors': False,
         'normalized': True,
-        'line-width': 2.7,
-        'line-type': 0
         }
 
 defaultStyle_events_per_gev = defaultStyle.copy()

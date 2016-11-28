@@ -3,12 +3,12 @@
 plotDate=`date +%F`
 
 if [ -z "$1" ]; then
-    suffix=""
+    prefix=""
 else
-    suffix=_$1
+    prefix=$1
 fi
 
-plotDir=plots_normalized_${plotDate}${suffix}
+plotDir=${prefix}_plots_normalized_${plotDate}
 
 mkdir ${plotDir}
 

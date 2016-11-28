@@ -246,7 +246,24 @@
 #  legend: ZZ
 #  line-color: '#ECD078'
 #  line-width: 2.7
-#
+'DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_histos.root':
+  type: signal
+  #group: DY
+  legend: 'Drell-Yan'
+  line-color: '#00A0B0'
+  line-width: 2.7
+'ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg_Fall15MiniAODv2_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_histos.root':
+  type: signal
+  legend: 'tW+'
+  line-color: '#C02942'
+  line-width: 2.7
+
+'ST_tW_top_5f_inclusiveDecays_13TeV-powheg_Fall15MiniAODv2_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_histos.root':
+  type: signal
+  legend: 'tW-'
+  line-color: '#000000'
+  line-width: 2.7
+
   #group: tt
 #  order: 7
 #
@@ -325,12 +342,6 @@
 ##  group: DY
 ##  order: 7
 ##
-'DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_histos.root':
-  type: signal
-  #group: DY
-  legend: 'Drell-Yan'
-  line-color: '#00A0B0'
-  line-width: 2.7
 #  order: 7
 #
 ## Signals 
