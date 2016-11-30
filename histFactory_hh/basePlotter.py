@@ -249,6 +249,8 @@ class BasePlotter:
         self.el_tf_plot = []
         self.momemta_weights_skimmer_plot = []
         self.momemta_weights_plot = []
+        self.momemta_weights_fromtree_plot = []
+        self.momemta_combine_plot = []
         
         #MIS stuff 
         self.mis_plot = []
@@ -1156,6 +1158,77 @@ class BasePlotter:
             ############
             # WARNING : do not put *W*eight in the plot family name, otherwise no reweighting will be applied, *w*eight is ok
             ###########
+            stringForWeightSum = ""
+            for mom_weight in mom_weightList:
+                stringForPonderatedWeightSum += "(" + mom_weight +"_weight/%s)+"%expected_yields[mom_weight]
+                stringForPonderatedWeightProduct += "(-log10(" + mom_weight +"_weight/%s))*"%expected_yields[mom_weight]
+                stringForWeightSum += mom_weight +"_minLog_weight+"
+                stringForWeightProduct += mom_weight +"_minLog_weight*"
+                self.momemta_weights_plot.extend(generateWeightPlot(mom_weight))
+                self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer(mom_weight))
+                self.momemta_weights_fromtree_plot.extend(generateWeightFromtreePlot(mom_weight))
+                for mom_weight_bis in mom_weightList:
+                    if mom_weight != mom_weight_bis :
+                        self.momemta_combine_plot.extend(generateAtanWeightPlot(mom_weight, mom_weight_bis))
+            stringForWeightSum = stringForWeightSum[:-1]
+            stringForWeightProduct = stringForWeightProduct[:-1]
+            stringForPonderatedWeightSum = "-log10("stringForPonderatedWeightSum[:-1]+")"
+            stringForPonderatedWeightProduct = stringForPonderatedWeightProduct[:-1]
+            mom_weightList = ['pp_Z_llbb_simple_tfJetAllEta', 'pp_zh_llbb_simple_tfJetAllEta', 'pp_zz_llbb_simple_tfJetAllEta', 'pp_tt_llbb_tfJetAllEta', 'twminus_tfJetAllEta', 'twplus_tfJetAllEta']
+            expected_yields = {'pp_Z_llbb_simple_tfJetAllEta':'2968.5', 'pp_zh_llbb_simple_tfJetAllEta':'28.6', 'pp_zz_llbb_simple_tfJetAllEta':'49.4', 'pp_tt_llbb_tfJetAllEta':'11935.3', 'twminus_tfJetAllEta':'190.6', 'twplus_tfJetAllEta':'194.4'}
+            def generateWeightFromtreePlot(name):
+                return [
+                        {
+                        'name': name+'_minLog_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_minLog_weight',
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 10, 40)'
+                        }, 
+                        {
+                        'name': name+'_ponderated_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_weight*2300/%s'%expected_yields[name],
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 0, 3)'
+                        }, 
+                        {
+                        'name': name+'_minLog_weight_up_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_minLog_weight_up',
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 10, 40)'
+                        }, 
+                        {
+                        'name': name+'_minLog_weight_down_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_minLog_weight_down',
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 10, 40)'
+                        }, 
+                        {
+                        'name': name+'_weightRelError_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_weightRelError',
+                        'plot_cut': self.totalCut,
+                        'binning': '(100, 0, 1)'
+                        },
+                        {
+                        'name': name+'_IntegStatus_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_IntegStatus',
+                        'plot_cut': self.totalCut,
+                        'binning': '(2, 0, 2)'
+                        },
+                        {
+                        'name': name+'_time_%s_%>s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_time',
+                        'plot_cut': self.totalCut,
+                        'binning': '(90, 0, 3)'
+                        },
+            def generateAtanWeightPlot(name1, name2):
+                return [
+                        {
+                        'name': 'arcTan_'+name1'_minus_'name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': '(std::atan('+name1+'_minLog_weight - '+name2+'_minLog_weight)+1.6)/3.2',
+                        'plot_cut': self.totalCut,
+                        'binning': '(90, 0, 3)'
+                        },
+                        ]
             def generateWeightPlot(name):
                 return [
                         {
@@ -1210,18 +1283,34 @@ class BasePlotter:
                         'binning': '(80, 10, 40)'
                         }
                         ]
-            self.momemta_weights_plot.extend(generateWeightPlot('pp_Z_llbb_simple_tfJetAllEta'))
-            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_Z_llbb_simple_tfJetAllEta'))
-            self.momemta_weights_plot.extend(generateWeightPlot('pp_zz_llbb_simple_tfJetAllEta'))
-            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_zh_llbb_simple_tfJetAllEta'))
-            self.momemta_weights_plot.extend(generateWeightPlot('pp_zh_llbb_simple_tfJetAllEta'))
-            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_zz_llbb_simple_tfJetAllEta'))
-            self.momemta_weights_plot.extend(generateWeightPlot('pp_tt_llbb_tfJetAllEta'))
-            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('pp_tt_llbb_tfJetAllEta'))
-            self.momemta_weights_plot.extend(generateWeightPlot('twminus_tfJetAllEta'))
-            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('twminus_tfJetAllEta'))
-            self.momemta_weights_plot.extend(generateWeightPlot('twplus_tfJetAllEta'))
-            self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer('twplus_tfJetAllEta'))
+            self.momemta_combine_plot.extend([
+                        {
+                        'name': 'weightSum_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': stringForWeightSum,
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 10, 40)'
+                        },
+                        {
+                        'name': 'weightProduct_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': stringForWeightProduct,
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 10, 40)'
+                        },
+                        {
+                        'name': 'ponderated_weightSum_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': stringForPonderatedWeightSum,
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 10, 80)'
+                        },
+                        {
+                        'name': 'ponderated_weightProduct_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': stringForPonderatedWeightProduct,
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 0, 200)'
+                        },
+                        ])
+
+
             self.mis_plot.extend([
                         {
                         'name': 'nExtraJet_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
