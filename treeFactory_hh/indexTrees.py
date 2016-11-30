@@ -12,7 +12,7 @@ for file in fileToIndex :
     print "Start indexing %s"%file
     rootFile = ROOT.TFile(rootFileDirectory + file, "update")
     ttree = rootFile.Get("t")
-    ttree.BuildIndex("event_run", "event_number")
+    ttree.BuildIndex("event_run", "event_event")
     ttree.Write()
     rootFile.Close()
     print "Done."

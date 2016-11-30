@@ -1184,7 +1184,7 @@ class BasePlotter:
                         },
                         {
                         'name': name+'_IntegStatus_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': "{0}_integStatus".format(name),
+                        'variable': "{0}_IntegStatus".format(name),
                         'plot_cut': self.totalCut,
                         'binning': '(2, 0, 2)'
                         },
@@ -1329,7 +1329,7 @@ class BasePlotter:
                     'binning': '(2, 0, 2)'
                 },
                 {
-                    'name': 'event_number_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                    'name': 'event_event_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                     'variable': "event_event",
                     'plot_cut': self.totalCut,
                     'binning': '(300, 0, 300000)'

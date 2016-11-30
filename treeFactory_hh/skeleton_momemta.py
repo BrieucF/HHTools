@@ -66,14 +66,48 @@ def generate_weight_code(basePlotter):
                 "muMelP": [],
                 "mumu": [],
     }
+    weightFromTree_glob = True
+    weightFileDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/treeFactory_hh/testHeaders/condor/output/"
+    weightTagVersion = "v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3"
+    currentTagVersion = "v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3"
+    if weightFromTree_glob :
+        globals.code_before_loop += "   std::string dataset_name = m_dataset.db_name;\n"
+        globals.code_before_loop += '   std::string weight_tag_version = "%s";\n'%weightTagVersion
+        globals.code_before_loop += '   std::string current_tag_version = "%s";\n'%currentTagVersion
+        globals.code_before_loop += "   std::string::size_type tag_occurence = dataset_name.find(weight_tag_version);\n"
+        globals.code_before_loop += "   if (tag_occurence != std::string::npos)\n"
+        globals.code_before_loop += "       dataset_name.erase(tag_occurence, weight_tag_version.length());\n"
+        globals.code_before_loop += "   dataset_name += current_tag_version;\n"
+        globals.code_before_loop += '   std::string weightFileDir = "%s";\n'%weightFileDir
+        globals.code_before_loop += '   std::string weightFileName = weightFileDir + dataset_name + "_histos.root";\n'
+        globals.code_before_loop += '   std::cout << "Will take weights from "  << weightFileName << std::endl;\n'
+        globals.code_before_loop += '   bool weightFileExists;\n'
+        globals.code_before_loop += '   ifstream temp_f(weightFileName.c_str());\n'
+        globals.code_before_loop += '   weightFileExists = temp_f.good();\n'
+        globals.code_before_loop += '   std::cout << "Weight file exists " << weightFileExists << std::endl;\n'
+        globals.code_before_loop += '   TFile *weightRootFile;\n'
+        globals.code_before_loop += '   TTree *weightTree;\n'
+        globals.code_before_loop += '   if (weightFileExists) {\n'
+        globals.code_before_loop += '       weightRootFile = new TFile(weightFileName.c_str(), "read");\n'
+        globals.code_before_loop += '       weightTree = (TTree*) weightRootFile->Get("t");\n'
+        globals.code_before_loop += '   }\n'
+        globals.code_in_loop += '       Int_t gotEntryWithIndex;\n'
+        globals.code_in_loop += '       if (weightFileExists) {\n'
+        globals.code_in_loop += '           gotEntryWithIndex = weightTree->GetEntryWithIndex(event_run, event_event);\n'
+        globals.code_in_loop += '       }\n'
 
-    def newConfig(name, luaConfig, globalParameters, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, isr}, met", tf_categories=tf_categories, prefixLuaParameters="dy"):
+        globals.extra_branches.extend(["event_event", "event_run"])
 
+
+
+    def newConfig(name, luaConfig, globalParameters, weightFromTree = True, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, isr}, met"):
+
+        prefixLuaParameters = "dy"
         globals.code_before_loop += "\n"
         name = name
         weightsName = name + "_weights"
         globals.code_before_loop += "    std::vector<std::pair<double, double>> %s;\n"%(weightsName)
-        weightsIntegStatusName = name + "_integStatus"
+        weightsIntegStatusName = name + "_IntegStatus"
         globals.code_before_loop += "    bool %s;\n"%(weightsIntegStatusName)
         weightsTimeName = name + "_time"
         weightsStartTimeName = name + "_startTime"
@@ -85,6 +119,16 @@ def generate_weight_code(basePlotter):
         globals.code_before_loop += "    " + lua_parameterSetName + """.set("matrix_element_prefix", "%s");\n"""%(globalParameters["matrix_element_prefix"])
         configReaderName =  "%s_configuration" % name
         globals.code_before_loop += """    ConfigurationReader %s("%s", %s_lua_parameters);\n""" % (configReaderName, luaConfig, prefixLuaParameters)
+        if weightFromTree :
+            globals.code_before_loop += "   std::vector<std::pair<double, double>> %s_fromTree;\n"%(weightsName)
+            globals.code_before_loop += "   Float_t %s_weight_fromTree;\n"%name
+            globals.code_before_loop += "   Float_t %s_weightError_fromTree;\n"%name
+            globals.code_before_loop += "   Float_t %s_IntegStatus_fromTree;\n"%name
+            globals.code_before_loop += '   if (weightFileExists) {\n'
+            globals.code_before_loop += '       weightTree->SetBranchAddress("{0}_weight", &{0}_weight_fromTree);\n'.format(name)
+            globals.code_before_loop += '       weightTree->SetBranchAddress("{0}_weightError", &{0}_weightError_fromTree);\n'.format(name)
+            globals.code_before_loop += '       weightTree->SetBranchAddress("{0}_IntegStatus", &{0}_IntegStatus_fromTree);\n'.format(name)
+            globals.code_before_loop += '   }\n'
         for parameter in globalParameters.keys():
             globals.code_before_loop += """    %s.getGlobalParameters().set("%s", "%s");\n""" % (configReaderName, parameter, globalParameters[parameter])
         for category in tf_categories:
@@ -97,12 +141,26 @@ def generate_weight_code(basePlotter):
             globals.code_before_loop += """\n    MoMEMta %s(%s.freeze());\n\n""" % (weightComputerName, configReaderName)
     #        globals.code_in_loop_per_category[category].append("""          std::cout << "Start computing weight %s" << std::endl;\n"""% (nameWithFlavour))
             globals.code_in_loop_per_category[category].append("""          %s = system_clock::now();\n"""%weightsStartTimeName)
-            globals.code_in_loop_per_category[category].append("            %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
+            if weightFromTree :
+                globals.code_in_loop_per_category[category].append("""          if (weightFileExists && gotEntryWithIndex != -1){\n""")
+                globals.code_in_loop_per_category[category].append("                %s = {std::make_pair(%s_weight_fromTree, %s_weightError_fromTree)};\n"% (weightsName, name, name))
+                globals.code_in_loop_per_category[category].append("                %s = %s_IntegStatus_fromTree;"%(weightsIntegStatusName, name))
+                globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": took weight %s from tree." << std::endl;\n'%(name))
+                globals.code_in_loop_per_category[category].append("            }\n")
+                globals.code_in_loop_per_category[category].append("            else {\n")
+                globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": need to compute weight %s." << std::endl;\n'%(name))
+                globals.code_in_loop_per_category[category].append("                %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
+                globals.code_in_loop_per_category[category].append("                %s = (%s.getIntegrationStatus() == MoMEMta::IntegrationStatus::SUCCESS);\n"%(weightsIntegStatusName, weightComputerName))
+                globals.code_in_loop_per_category[category].append("            }\n")
+            else :
+                globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": compute weight %s (did not ask taking it from tree)." << std::endl;\n'%(name))
+                globals.code_in_loop_per_category[category].append("                %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
+                globals.code_in_loop_per_category[category].append("                %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
+                globals.code_in_loop_per_category[category].append("                %s = (%s.getIntegrationStatus() == MoMEMta::IntegrationStatus::SUCCESS);\n"%(weightsIntegStatusName, weightComputerName))
+
             globals.code_in_loop_per_category[category].append("""          %s = system_clock::now();\n"""%weightsEndTimeName)
             globals.code_in_loop_per_category[category].append("""          %s = (std::chrono::duration_cast<seconds>(%s - %s).count())/60.0;\n"""%(weightsTimeName, weightsEndTimeName, weightsStartTimeName))
-            globals.code_in_loop_per_category[category].append("            %s = (%s.getIntegrationStatus() == MoMEMta::IntegrationStatus::SUCCESS);\n"%(weightsIntegStatusName, weightComputerName))
             globals.code_in_loop_per_category[category].append("            if (%s.at(0).first == 0) %s = { std::make_pair(std::numeric_limits<double>::min(), 0) };\n"% (weightsName, weightsName))
-            globals.code_in_loop_per_category[category].append("""          std::cout << "Computed weight %s : " << %s.at(0).first << " +- " << %s.at(0).second << " in " << %s << " min." << std::endl;\n"""% (nameWithFlavour, weightsName, weightsName, weightsTimeName))
             globals.code_in_loop_per_category[category].append("\n")
 
     #newConfig("dy_tradeElep2ForZMass_Jet_ba_ec_Ele_ba_Mu_ba", {} , "dy")
@@ -129,13 +187,13 @@ def generate_weight_code(basePlotter):
     parameters_twminus["matrix_element_parameters"] = MatrixElementDir+"/pp_twMinusbbar_tAndWOnshell_5f/Cards/param_card.dat"
     parameters_twminus["matrix_element_prefix"] = "pp_twMinusbbar_tAndWOnshell_5f"
     parameters_twminus["matrix_element"] = "pp_twMinusbbar_tAndWOnshell_5f_sm_no_b_mass_P1_Sigma_sm_no_b_mass_gb_mupvmbemvex"
-    newConfig("twminus_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/fiveFlavour_twMinusbbar.lua", parameters_twminus, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, dummy_neutrino}, met")
+    newConfig("twminus_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/fiveFlavour_twMinusbbar.lua", parameters_twminus, weightFromTree = True, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, dummy_neutrino}, met")
     # tW+ weight
     parameters_twminus = copy.deepcopy(baseGlobalParameters)
     parameters_twminus["matrix_element_parameters"] = MatrixElementDir+"/pp_tbarwPlusb_tAndWOnshell_5f/Cards/param_card.dat"
     parameters_twminus["matrix_element_prefix"] = "pp_tbarwPlusb_tAndWOnshell_5f"
     parameters_twminus["matrix_element"] = "pp_tbarwPlusb_tAndWOnshell_5f_sm_no_b_mass_P1_Sigma_sm_no_b_mass_gbx_mumvmxbxepve"
-    newConfig("twplus_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/fiveFlavour_tbarwPlusb.lua", parameters_twminus, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, dummy_neutrino}, met")
+    newConfig("twplus_tfJetAllEta", "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta_cfg/fiveFlavour_tbarwPlusb.lua", parameters_twminus, weightFromTree = True, computeWeight_input = "{neg_lepton, pos_lepton, bjet1, bjet2, dummy_neutrino}, met")
     ## ZZ weights
     parameters_pp_zz_llbb_simple = copy.deepcopy(baseGlobalParameters)
     parameters_pp_zz_llbb_simple["matrix_element_parameters"] = MatrixElementDir+"/pp_to_zz_to_llbb/Cards/param_card.dat"
