@@ -1158,22 +1158,6 @@ class BasePlotter:
             ############
             # WARNING : do not put *W*eight in the plot family name, otherwise no reweighting will be applied, *w*eight is ok
             ###########
-            stringForWeightSum = ""
-            for mom_weight in mom_weightList:
-                stringForPonderatedWeightSum += "(" + mom_weight +"_weight/%s)+"%expected_yields[mom_weight]
-                stringForPonderatedWeightProduct += "(-log10(" + mom_weight +"_weight/%s))*"%expected_yields[mom_weight]
-                stringForWeightSum += mom_weight +"_minLog_weight+"
-                stringForWeightProduct += mom_weight +"_minLog_weight*"
-                self.momemta_weights_plot.extend(generateWeightPlot(mom_weight))
-                self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer(mom_weight))
-                self.momemta_weights_fromtree_plot.extend(generateWeightFromtreePlot(mom_weight))
-                for mom_weight_bis in mom_weightList:
-                    if mom_weight != mom_weight_bis :
-                        self.momemta_combine_plot.extend(generateAtanWeightPlot(mom_weight, mom_weight_bis))
-            stringForWeightSum = stringForWeightSum[:-1]
-            stringForWeightProduct = stringForWeightProduct[:-1]
-            stringForPonderatedWeightSum = "-log10("stringForPonderatedWeightSum[:-1]+")"
-            stringForPonderatedWeightProduct = stringForPonderatedWeightProduct[:-1]
             mom_weightList = ['pp_Z_llbb_simple_tfJetAllEta', 'pp_zh_llbb_simple_tfJetAllEta', 'pp_zz_llbb_simple_tfJetAllEta', 'pp_tt_llbb_tfJetAllEta', 'twminus_tfJetAllEta', 'twplus_tfJetAllEta']
             expected_yields = {'pp_Z_llbb_simple_tfJetAllEta':'2968.5', 'pp_zh_llbb_simple_tfJetAllEta':'28.6', 'pp_zz_llbb_simple_tfJetAllEta':'49.4', 'pp_tt_llbb_tfJetAllEta':'11935.3', 'twminus_tfJetAllEta':'190.6', 'twplus_tfJetAllEta':'194.4'}
             def generateWeightFromtreePlot(name):
@@ -1215,15 +1199,16 @@ class BasePlotter:
                         'binning': '(2, 0, 2)'
                         },
                         {
-                        'name': name+'_time_%s_%>s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'name': name+'_time_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': name+'_time',
                         'plot_cut': self.totalCut,
                         'binning': '(90, 0, 3)'
                         },
+                        ]
             def generateAtanWeightPlot(name1, name2):
                 return [
                         {
-                        'name': 'arcTan_'+name1'_minus_'name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'name': 'arcTan_'+name1+'_minus_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': '(std::atan('+name1+'_minLog_weight - '+name2+'_minLog_weight)+1.6)/3.2',
                         'plot_cut': self.totalCut,
                         'binning': '(90, 0, 3)'
@@ -1283,6 +1268,26 @@ class BasePlotter:
                         'binning': '(80, 10, 40)'
                         }
                         ]
+            stringForWeightSum = ""
+            stringForPonderatedWeightSum = ""
+            stringForWeightProduct = ""
+            stringForPonderatedWeightProduct = ""
+            for mom_weight in mom_weightList:
+                stringForWeightSum += mom_weight +"_minLog_weight+"
+                stringForWeightProduct += mom_weight +"_minLog_weight*"
+                stringForPonderatedWeightSum += "(" + mom_weight +"_weight/%s)+"%expected_yields[mom_weight]
+                stringForPonderatedWeightProduct += "(-log10(" + mom_weight +"_weight/%s))*"%expected_yields[mom_weight]
+                self.momemta_weights_plot.extend(generateWeightPlot(mom_weight))
+                self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer(mom_weight))
+                self.momemta_weights_fromtree_plot.extend(generateWeightFromtreePlot(mom_weight))
+                for mom_weight_bis in mom_weightList:
+                    if mom_weight != mom_weight_bis :
+                        self.momemta_combine_plot.extend(generateAtanWeightPlot(mom_weight, mom_weight_bis))
+            stringForWeightSum = stringForWeightSum[:-1]
+            stringForWeightProduct = stringForWeightProduct[:-1]
+            stringForPonderatedWeightSum = "-log10("+stringForPonderatedWeightSum[:-1]+")"
+            stringForPonderatedWeightProduct = stringForPonderatedWeightProduct[:-1]
+
             self.momemta_combine_plot.extend([
                         {
                         'name': 'weightSum_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
