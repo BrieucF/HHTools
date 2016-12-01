@@ -13,3 +13,5 @@ def init():
     code_before_loop = ""
     global code_in_loop
     code_in_loop = ""
+    global code_after_loop
+    code_after_loop = ""

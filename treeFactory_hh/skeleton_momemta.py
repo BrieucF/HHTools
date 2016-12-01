@@ -12,6 +12,7 @@ def generate_weight_code(basePlotter):
     globals.headers.append("chrono")
     globals.libraries.extend(['momemta'])
     globals.library_directories.extend(["/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/MoMEMta/build/install/lib/"])
+    globals.code_after_loop += '    output_tree_->BuildIndex("event_run", "event_event");'
     globals.code_before_loop += """
         using namespace std::chrono;\n
         using namespace momemta;\n
@@ -67,34 +68,26 @@ def generate_weight_code(basePlotter):
                 "mumu": [],
     }
     weightFromTree_glob = True
-    weightFileDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/treeFactory_hh/testHeaders/condor/output/"
-    weightTagVersion = "v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3"
+    weightFileDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/treeFactory_hh/weightProd_v0/condor/output/"
+    weightTagVersion = "v0.1.5?76X_HHAnalysis_v1.0?765_MISearch_2016-08-10.v3"
     currentTagVersion = "v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3"
     if weightFromTree_glob :
         globals.code_before_loop += "   std::string dataset_name = m_dataset.db_name;\n"
         globals.code_before_loop += '   std::string weight_tag_version = "%s";\n'%weightTagVersion
         globals.code_before_loop += '   std::string current_tag_version = "%s";\n'%currentTagVersion
-        globals.code_before_loop += "   std::string::size_type tag_occurence = dataset_name.find(weight_tag_version);\n"
+        globals.code_before_loop += "   std::string::size_type tag_occurence = dataset_name.find(current_tag_version);\n"
         globals.code_before_loop += "   if (tag_occurence != std::string::npos)\n"
-        globals.code_before_loop += "       dataset_name.erase(tag_occurence, weight_tag_version.length());\n"
-        globals.code_before_loop += "   dataset_name += current_tag_version;\n"
+        globals.code_before_loop += "       dataset_name.erase(tag_occurence, current_tag_version.length());\n"
+        globals.code_before_loop += "   dataset_name += weight_tag_version;\n"
         globals.code_before_loop += '   std::string weightFileDir = "%s";\n'%weightFileDir
-        globals.code_before_loop += '   std::string weightFileName = weightFileDir + dataset_name + "_histos.root";\n'
+        globals.code_before_loop += '   std::string weightFileName = weightFileDir + dataset_name + "*histos_*.root";\n'
         globals.code_before_loop += '   std::cout << "Will take weights from "  << weightFileName << std::endl;\n'
-        globals.code_before_loop += '   bool weightFileExists;\n'
         globals.code_before_loop += '   ifstream temp_f(weightFileName.c_str());\n'
-        globals.code_before_loop += '   weightFileExists = temp_f.good();\n'
+        globals.code_before_loop += '   TChain *weightTree = new TChain("t");\n'
+        globals.code_before_loop += '   bool weightFileExists = weightTree->Add(weightFileName.c_str());\n'
         globals.code_before_loop += '   std::cout << "Weight file exists " << weightFileExists << std::endl;\n'
-        globals.code_before_loop += '   TFile *weightRootFile;\n'
-        globals.code_before_loop += '   TTree *weightTree;\n'
-        globals.code_before_loop += '   if (weightFileExists) {\n'
-        globals.code_before_loop += '       weightRootFile = new TFile(weightFileName.c_str(), "read");\n'
-        globals.code_before_loop += '       weightTree = (TTree*) weightRootFile->Get("t");\n'
-        globals.code_before_loop += '   }\n'
-        globals.code_in_loop += '       Int_t gotEntryWithIndex;\n'
-        globals.code_in_loop += '       if (weightFileExists) {\n'
-        globals.code_in_loop += '           gotEntryWithIndex = weightTree->GetEntryWithIndex(event_run, event_event);\n'
-        globals.code_in_loop += '       }\n'
+        globals.code_before_loop += '   weightTree->BuildIndex("event_run", "event_event");\n'
+        globals.code_in_loop += '       Int_t gotEntryWithIndex = weightTree->GetEntryWithIndex(event_run, event_event);\n'
 
         globals.extra_branches.extend(["event_event", "event_run"])
 

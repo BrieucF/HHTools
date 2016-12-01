@@ -50,5 +50,6 @@ library_directories = globals.library_directories
 code_before_loop = globals.code_before_loop
 code_in_loop = globals.code_in_loop
 extra_branches = globals.extra_branches
+code_after_loop = globals.code_after_loop
 
 include_directories.append(os.path.join(scriptDir, "..", "common"))
