@@ -6,9 +6,8 @@ parser.add_argument('-d', '--directory', dest='directory', help='Name of the dir
 args = parser.parse_args()
 
 rootFileDirectory = args.directory
-fileToIndex = [file for file in os.listdir(rootFileDirectory) if "histos.root" in file]
+fileToIndex = [file for file in os.listdir(rootFileDirectory) if "histos_" in file]
 for file in fileToIndex :
-    #rootFile = ROOT.TFile(rootFileDirectory + file, "update")
     print "Start indexing %s"%file
     rootFile = ROOT.TFile(rootFileDirectory + file, "update")
     ttree = rootFile.Get("t")

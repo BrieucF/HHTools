@@ -101,7 +101,7 @@ Samples.extend([
     'TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8', # TTZ(QQ),
     'ttHTobb_M125_13TeV_powheg_pythia8', # ttH(bb)
     'ttHToNonbb_M125_13TeV_powheg_pythia8', # ttH(nonbb)
-    # 'TTTo2L2Nu_13TeV-powheg', # TT(2L2Nu)
+    'TTTo2L2Nu_13TeV-powheg', # TT(2L2Nu)
     ])
 
 # # TT aMC@NLO
