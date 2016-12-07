@@ -13,7 +13,7 @@ parser.add_argument('--blinded', dest='unblinded', help='If you want to produce 
 args = parser.parse_args()
 
 baseDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/"
-fileName = baseDir + args.directory + "/condor/output/TTTo2L2Nu_13TeV-powheg_Fall15MiniAODv2_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_histos.root"
+fileName = baseDir + args.directory + "/condor/output/TTTo2L2Nu_13TeV-powheg_Fall15MiniAODv2_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1_histos.root"
 
 skim = False
 
@@ -33,7 +33,7 @@ defaultStyle = {
         'legend-columns': 2,
         'show-ratio': True,
         'show-overflow': True,
-        'show-errors': True
+        'show-errors': True,
         }
 
 defaultStyle_events_per_gev = defaultStyle.copy()
@@ -52,6 +52,8 @@ nHistos = 0
 
 for key in keys:
     
+    if not "arcTan_twminus_tfJetAllEta_minus_twplus_tf" in key.GetName() :
+        continue
     if key.GetName() not in alreadyIn and not "__" in key.GetName():
 
         ## Some manual choices which plots to skip...

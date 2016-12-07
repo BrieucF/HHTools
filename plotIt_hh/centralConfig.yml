@@ -7,7 +7,7 @@ extra-label: "Preliminary"
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/MIS_RUNII_firstRound/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/singleTopWeigt_v1/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/5f_singleTopWeigt_v0_checkPermutation_noAddBjetBoost_moreTW/condor/output/'
-root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/singleTop_NoadditionalObjectInBlockB/condor/output/'
+root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/weightPlot_v2/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/firstTTbarAndZZWeights/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/ttWeight_noTF_NWAtrue_more/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/refix_ttweights/condor/output/'
