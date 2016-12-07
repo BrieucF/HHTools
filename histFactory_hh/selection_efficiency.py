@@ -49,6 +49,7 @@ def get_dataset(iDataset):
 
 import samplesToRunOn
 analysis_tags = samplesToRunOn.analysis_tags
+analysis_tags_for_evt_perJob = samplesToRunOn.analysis_tags_for_evt_perJob
 Samples = samplesToRunOn.Samples
 SamplesToSplitMore = samplesToRunOn.SamplesToSplitMore
 SamplesToSplitAbitMore = samplesToRunOn.SamplesToSplitAbitMore
@@ -61,7 +62,7 @@ parser.add_argument('-t', '--tree', help='Set to true if you use tree instead of
 args = parser.parse_args()
 
 # Convert samples into ids
-def convert_to_ids(samples):
+def convert_to_ids(samples, analysis_tags):
     ids = []
     for sample in samples:
         found = False
@@ -77,14 +78,19 @@ def convert_to_ids(samples):
 
     return ids
 
-IDs = convert_to_ids(Samples)
-IDsToSplitMore = convert_to_ids(SamplesToSplitMore)
-IDsToSplitAbitMore = convert_to_ids(SamplesToSplitAbitMore)
+IDs = convert_to_ids(Samples, analysis_tags)
+IDsToSplitMore = convert_to_ids(SamplesToSplitMore, analysis_tags)
+IDsToSplitAbitMore = convert_to_ids(SamplesToSplitAbitMore, analysis_tags)
+
+IDs_for_evt_per_job = convert_to_ids(Samples, analysis_tags_for_evt_perJob)
+print IDs_for_evt_per_job
 
 efficiencies = {}
-target_n_evt_to_compute_weight = 1000 # ~30 hour of running time
+#target_n_evt_to_compute_weight = 1000 # ~30 hour of running time with weight computation
+target_n_evt_to_compute_weight = 1000
 n_evt_per_job = {}
 
+i = 0
 samples = []
 for ID in IDs :
     db_sample = get_sample(ID)
@@ -112,17 +118,18 @@ for ID in IDs :
         #efficiencies[db_name] = efficiency_ntuple_to_sel
         if efficiency_ntuple_to_sel == 0:
             efficiency_ntuple_to_sel = 0.001
-        n_evt_per_job[ID] = int(target_n_evt_to_compute_weight/efficiency_ntuple_to_sel)
-        print db_name, " ", n_evt_per_job[ID], " event per job"
+        n_evt_per_job[IDs_for_evt_per_job[i]] = int(target_n_evt_to_compute_weight/efficiency_ntuple_to_sel)
+        print db_name, " ", n_evt_per_job[IDs_for_evt_per_job[i]], " event per job"
         #print db_name
         #print "     Efficiency ntuple to selection : %0.2f "%(bare_efficiency*100)
         #print "     Real efficiency : %0.2f "%(real_efficiency*100)
     else :
         if ID in IDsToSplitAbitMore :
-            n_evt_per_job[ID] = 8000 
+            n_evt_per_job[IDs_for_evt_per_job[i]] = 8000 
         else :
-            n_evt_per_job[ID] = 4000
-        print db_name, " ", n_evt_per_job[ID], " event per job (file not found)"
+            n_evt_per_job[IDs_for_evt_per_job[i]] = 4000
+        print db_name, " ", n_evt_per_job[IDs_for_evt_per_job[i]], " event per job (file not found)"
+    i += 1
 
 with open("event_per_job.json", "w") as outJson:
     json.dump(n_evt_per_job, outJson)

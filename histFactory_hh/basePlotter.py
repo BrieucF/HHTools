@@ -114,11 +114,11 @@ class BasePlotter:
 
         # Possible stages (selection)
         mll_cut = "((91 - {0}.M()) > 15)".format(self.ll_str)
-        mjj_blind = "({0}.M() < 75 || {0}.M() > 140)".format(self.jj_str)
         dict_stage_cut = {
                "no_cut": "", 
                "mll_cut": mll_cut,
-               "mjj_blind": self.joinCuts(mjj_blind, mll_cut),
+               "zero_ttweight": "(pp_tt_llbb_tfJetAllEta_minLog_weight > 40)",
+               "nonzero_ttweight": "(pp_tt_llbb_tfJetAllEta_minLog_weight < 40)",
                }
         # High-BDT stages
         for suffix in suffixes:
@@ -398,11 +398,47 @@ class BasePlotter:
                         'binning': '(50, 0, 1)'
                 },
                 {
+                        'name': 'jet1_btag_L_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': self.jet1_str+".btag_L",
+                        'plot_cut': self.totalCut,
+                        'binning': '(2, 0, 2)'
+                },
+                {
+                        'name': 'jet1_btag_M_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': self.jet1_str+".btag_M",
+                        'plot_cut': self.totalCut,
+                        'binning': '(2, 0, 2)'
+                },
+                {
+                        'name': 'jet1_btag_T_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': self.jet1_str+".btag_T",
+                        'plot_cut': self.totalCut,
+                        'binning': '(2, 0, 2)'
+                },
+                {
                         'name': 'jet2_CSV_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': self.jet2_str+".CSV",
                         'plot_cut': self.totalCut,
                         'binning': '(50, 0, 1)'
-                }
+                },
+                {
+                        'name': 'jet2_btag_L_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': self.jet2_str+".btag_L",
+                        'plot_cut': self.totalCut,
+                        'binning': '(2, 0, 2)'
+                },
+                {
+                        'name': 'jet2_btag_M_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': self.jet2_str+".btag_M",
+                        'plot_cut': self.totalCut,
+                        'binning': '(2, 0, 2)'
+                },
+                {
+                        'name': 'jet2_btag_T_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': self.jet2_str+".btag_T",
+                        'plot_cut': self.totalCut,
+                        'binning': '(2, 0, 2)'
+                },
             ])
             self.cleancut_plot.extend([
                 #{
@@ -1159,7 +1195,8 @@ class BasePlotter:
             # WARNING : do not put *W*eight in the plot family name, otherwise no reweighting will be applied, *w*eight is ok
             ###########
             mom_weightList = ['pp_Z_llbb_simple_tfJetAllEta', 'pp_zh_llbb_simple_tfJetAllEta', 'pp_zz_llbb_simple_tfJetAllEta', 'pp_tt_llbb_tfJetAllEta', 'twminus_tfJetAllEta', 'twplus_tfJetAllEta']
-            expected_yields = {'pp_Z_llbb_simple_tfJetAllEta':'2968.5', 'pp_zh_llbb_simple_tfJetAllEta':'28.6', 'pp_zz_llbb_simple_tfJetAllEta':'49.4', 'pp_tt_llbb_tfJetAllEta':'11935.3', 'twminus_tfJetAllEta':'190.6', 'twplus_tfJetAllEta':'194.4'}
+            renorm_factors = {'pp_Z_llbb_simple_tfJetAllEta':'2968.5', 'pp_zh_llbb_simple_tfJetAllEta':'28.6', 'pp_zz_llbb_simple_tfJetAllEta':'49.4', 'pp_tt_llbb_tfJetAllEta':'11935.3', 'twminus_tfJetAllEta':'190.6', 'twplus_tfJetAllEta':'194.4'}
+            #renorm_factors = {'pp_Z_llbb_simple_tfJetAllEta':'2.28e-12', 'pp_zh_llbb_simple_tfJetAllEta':'0.01606e-12', 'pp_zz_llbb_simple_tfJetAllEta':'0.09273e-12', 'pp_tt_llbb_tfJetAllEta':'5.686e-12', 'twminus_tfJetAllEta':'0.3218e-12', 'twplus_tfJetAllEta':'0.3212e-12'}
             def generateWeightFromtreePlot(name):
                 return [
                         {
@@ -1169,10 +1206,10 @@ class BasePlotter:
                         'binning': '(80, 10, 40)'
                         }, 
                         {
-                        'name': name+'_ponderated_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': name+'_weight*2300/%s'%expected_yields[name],
+                        'name': name+'_punderated_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': "-log10("+name+'_weight/%s)'%renorm_factors[name],
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 0, 3)'
+                        'binning': '(80, 15, 40)'
                         }, 
                         {
                         'name': name+'_minLog_weight_up_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
@@ -1208,10 +1245,22 @@ class BasePlotter:
             def generateAtanWeightPlot(name1, name2):
                 return [
                         {
+                        'name': 'arcTanPunderated_'+name1+'_minus_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': '(std::atan(-log10(' + name1 + '_weight/%s) - -log10('%renorm_factors[name1] + name2 + '_weight/%s))+1.6)/3.2'%renorm_factors[name2],
+                        'plot_cut': self.totalCut,
+                        'binning': '(90, 0, 1)'
+                        },
+                        {
+                        'name': 'KDlikePunderated_'+name1+'_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': '1./(1.+((' + name1 + '_weight/%s)/('%renorm_factors[name1] + name2 + '_weight/%s)))'%renorm_factors[name2],
+                        'plot_cut': self.totalCut,
+                        'binning': '(90, 0, 1)'
+                        },
+                        {
                         'name': 'arcTan_'+name1+'_minus_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': '(std::atan('+name1+'_minLog_weight - '+name2+'_minLog_weight)+1.6)/3.2',
                         'plot_cut': self.totalCut,
-                        'binning': '(90, 0, 3)'
+                        'binning': '(90, 0, 1)'
                         },
                         ]
             def generateWeightPlot(name):
@@ -1268,50 +1317,59 @@ class BasePlotter:
                         'binning': '(80, 10, 40)'
                         }
                         ]
+            stringForLogWeightSum = ""
             stringForWeightSum = ""
             stringForPonderatedWeightSum = ""
             stringForWeightProduct = ""
             stringForPonderatedWeightProduct = ""
             for mom_weight in mom_weightList:
-                stringForWeightSum += mom_weight +"_minLog_weight+"
+                stringForLogWeightSum += mom_weight +"_minLog_weight+"
+                stringForWeightSum += mom_weight +"_weight+"
                 stringForWeightProduct += mom_weight +"_minLog_weight*"
-                stringForPonderatedWeightSum += "(" + mom_weight +"_weight/%s)+"%expected_yields[mom_weight]
-                stringForPonderatedWeightProduct += "(-log10(" + mom_weight +"_weight/%s))*"%expected_yields[mom_weight]
+                stringForPonderatedWeightSum += "(" + mom_weight +"_weight/%s)+"%renorm_factors[mom_weight]
+                stringForPonderatedWeightProduct += "(-log10(" + mom_weight +"_weight/%s))*"%renorm_factors[mom_weight]
                 self.momemta_weights_plot.extend(generateWeightPlot(mom_weight))
                 self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer(mom_weight))
                 self.momemta_weights_fromtree_plot.extend(generateWeightFromtreePlot(mom_weight))
                 for mom_weight_bis in mom_weightList:
                     if mom_weight != mom_weight_bis :
                         self.momemta_combine_plot.extend(generateAtanWeightPlot(mom_weight, mom_weight_bis))
-            stringForWeightSum = stringForWeightSum[:-1]
+            stringForLogWeightSum = stringForLogWeightSum[:-1]
+            stringForWeightSum = '-log10('+stringForWeightSum[:-1]+')'
             stringForWeightProduct = stringForWeightProduct[:-1]
             stringForPonderatedWeightSum = "-log10("+stringForPonderatedWeightSum[:-1]+")"
             stringForPonderatedWeightProduct = stringForPonderatedWeightProduct[:-1]
 
             self.momemta_combine_plot.extend([
                         {
+                        'name': 'logWeightSum_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': stringForLogWeightSum,
+                        'plot_cut': self.totalCut,
+                        'binning': '(100, 100, 200)'
+                        },
+                        {
                         'name': 'weightSum_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': stringForWeightSum,
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 10, 40)'
+                        'binning': '(50, 15, 26)'
                         },
                         {
                         'name': 'weightProduct_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': stringForWeightProduct,
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 10, 40)'
+                        'binning': '(100, 40000000, 400000000)'
                         },
                         {
                         'name': 'ponderated_weightSum_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': stringForPonderatedWeightSum,
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 10, 80)'
+                        'binning': '(100, 18, 30)'
                         },
                         {
                         'name': 'ponderated_weightProduct_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': stringForPonderatedWeightProduct,
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 0, 200)'
+                        'binning': '(100, 100000000, 700000000)'
                         },
                         ])
 
@@ -1350,36 +1408,36 @@ class BasePlotter:
                         'binning': '(100, 0, 800)'
                 })
             self.forSkimmer_plot.extend([
-                {
-                        'name': 'lep1_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': self.lep1_str+".p4",
-                        'plot_cut': self.totalCut,
-                        'binning': '(50, 15, 400)'
-                },
-                {
-                        'name': 'lep2_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': self.lep2_str+".p4",
-                        'plot_cut': self.totalCut,
-                        'binning': '(50, 15, 400)'
-                },
-                {
-                        'name': 'jet1_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': self.jet1_str+".p4",
-                        'plot_cut': self.totalCut,
-                        'binning': '(50, 15, 400)'
-                },
-                {
-                        'name': 'jet2_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': self.jet2_str+".p4",
-                        'plot_cut': self.totalCut,
-                        'binning': '(50, 15, 400)'
-                },
-                {
-                'name': 'extraJet_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                'variable': self.extrajet_str+".p4",
-                'plot_cut': self.joinCuts(self.totalCut, self.extrajet_cut),
-                'binning': '(10, 0, 10)'
-                },
+                #{
+                #        'name': 'lep1_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                #        'variable': self.lep1_str+".p4",
+                #        'plot_cut': self.totalCut,
+                #        'binning': '(50, 15, 400)'
+                #},
+                #{
+                #        'name': 'lep2_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                #        'variable': self.lep2_str+".p4",
+                #        'plot_cut': self.totalCut,
+                #        'binning': '(50, 15, 400)'
+                #},
+                #{
+                #        'name': 'jet1_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                #        'variable': self.jet1_str+".p4",
+                #        'plot_cut': self.totalCut,
+                #        'binning': '(50, 15, 400)'
+                #},
+                #{
+                #        'name': 'jet2_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                #        'variable': self.jet2_str+".p4",
+                #        'plot_cut': self.totalCut,
+                #        'binning': '(50, 15, 400)'
+                #},
+                #{
+                #'name': 'extraJet_p4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                #'variable': self.extrajet_str+".p4",
+                #'plot_cut': self.joinCuts(self.totalCut, self.extrajet_cut),
+                #'binning': '(10, 0, 10)'
+                #},
                 {
                     'name': 'event_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                     'variable': "event_weight",

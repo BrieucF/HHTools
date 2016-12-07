@@ -44,6 +44,7 @@ def get_sample(iSample):
 
 import samplesToRunOn
 analysis_tags = samplesToRunOn.analysis_tags
+analysis_tags_for_evt_perJob = samplesToRunOn.analysis_tags_for_evt_perJob
 Samples = samplesToRunOn.Samples
 SamplesToSplitMore = samplesToRunOn.SamplesToSplitMore
 SamplesToSplitAbitMore = samplesToRunOn.SamplesToSplitAbitMore
@@ -85,13 +86,18 @@ IDs = convert_to_ids(Samples)
 IDsToSplitMore = convert_to_ids(SamplesToSplitMore)
 IDsToSplitAbitMore = convert_to_ids(SamplesToSplitAbitMore)
 
+weightFromFile = True
+
 # Find first MC sample and use one file as skeleton
 for id in IDs:
     sample = get_sample(id)
     if sample.source_dataset.datatype != "mc":
         continue
-
-    skeleton_file = "/storage/data/cms/" + sample.files.any().lfn
+    if sample.sampletype == u'SKIM':
+        skeleton_file = sample.files.any().lfn
+        weightFromFile = False
+    else :
+        skeleton_file = "/storage/data/cms/" + sample.files.any().lfn
     break
 
 if args.test: 
@@ -104,7 +110,8 @@ if args.test:
 
 samples = []
 for ID in IDs :
-    eventsPerJob = evt_per_job[unicode(ID)]
+    # eventsPerJob = evt_per_job[str(ID)]
+    eventsPerJob = 10000
     samples.append(
         {
             "ID": ID,
@@ -141,10 +148,15 @@ if not args.skip :
 
 
 ## Create Condor submitter to handle job creating
-mySub = condorSubmitter(samples, "%s/build/" % args.output + executable, "DUMMY", args.output+"/", rescale = True)
+mySub = condorSubmitter(samples, "%s/build/" % args.output + executable, "DUMMY", args.output+"/", rescale = True, weightFromFile = weightFromFile)
+#mySub = condorSubmitter(samples, "%s/build/" % args.output + executable, "DUMMY", args.output+"/", rescale = True)
 
 ## Create test_condor directory and subdirs
 mySub.setupCondorDirs()
+
+for sample in mySub.sampleCfg[:]:
+    if 'TT_TuneCUETP8M1_13TeV-powheg-pythia8' in sample["db_name"]:
+        sample["json_skeleton"][sample["db_name"]]["cross-section"] = 746.
 
 splitTT = False
 

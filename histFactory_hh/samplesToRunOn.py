@@ -1,6 +1,11 @@
 # Warning: put most recent tags first!
 analysis_tags = [
-        'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3',
+        #'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3',
+        'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1',
+        ]
+analysis_tags_for_evt_perJob = [
+        'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1',
+        #'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3',
         ]
 
 Samples = []
@@ -24,7 +29,7 @@ Samples.extend([
     'TT_TuneCUETP8M1_13TeV-powheg-pythia8', # TT incl NLO
     'DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext3', # DY M10-50 NLO merged
     'DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4', # DY M-50 NLO merged 
-    ])
+   ])
 
 # DY LO
 Samples.extend([
@@ -144,9 +149,9 @@ SamplesToSplitMore.extend([
     'GluGluToRadionToHHTo2B2VTo2L2Nu_M-900_narrow',
     'GluGluToRadionToHHTo2B2VTo2L2Nu_M-400_narrow',
     'GluGluToRadionToHHTo2B2VTo2L2Nu_M-650_narrow',
-    'GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-650_narrow',
-    'GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-900_narrow',
-    'GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-400_narrow',
+    #'GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-650_narrow',
+    #'GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-900_narrow',
+    #'GluGluToBulkGravitonToHHTo2B2VTo2L2Nu_M-400_narrow',
     'TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8_Fall15MiniAODv2',
     'ttHToNonbb_M125_13TeV_powheg_pythia8',
     'ttHTobb_M125_13TeV_powheg_pythia8',
