@@ -353,7 +353,7 @@
   type: signal
   cross-section: 10
   line-color: '#F0A30A'
-  legend: 'H(200) #\to ZA(50)'
+  legend: 'H(200) to ZA(50)'
   legend-order: 3
   line-width: 2.7
   line-type: 1
@@ -369,7 +369,7 @@
   type: signal
   cross-section: 1000
   line-color: '#ff0000'
-  legend: 'X(650) #\to hh'
+  legend: 'X(650) to hh'
   legend-order: 3
   line-width: 2
   line-type: 1

@@ -9,7 +9,7 @@
 'twm':
   legend: 'tW-'
   legend-order: 5
-  fill-color: '#75C02942'
+  fill-color: '#95C02942'
 'twp':
   legend: 'tW+'
   legend-order: 4

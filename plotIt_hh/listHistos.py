@@ -34,6 +34,7 @@ defaultStyle = {
         'show-ratio': True,
         'show-overflow': True,
         'show-errors': True,
+        'log-y-axis-range': [0.05, 100000]
         }
 
 defaultStyle_events_per_gev = defaultStyle.copy()
@@ -52,8 +53,6 @@ nHistos = 0
 
 for key in keys:
     
-    if not "arcTan_twminus_tfJetAllEta_minus_twplus_tf" in key.GetName() :
-        continue
     if key.GetName() not in alreadyIn and not "__" in key.GetName():
 
         ## Some manual choices which plots to skip...
