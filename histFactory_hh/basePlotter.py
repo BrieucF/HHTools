@@ -1195,9 +1195,10 @@ class BasePlotter:
             # WARNING : do not put *W*eight in the plot family name, otherwise no reweighting will be applied, *w*eight is ok
             ###########
             mom_weightList = ['pp_Z_llbb_simple_tfJetAllEta', 'pp_zh_llbb_simple_tfJetAllEta', 'pp_zz_llbb_simple_tfJetAllEta', 'pp_tt_llbb_tfJetAllEta', 'twminus_tfJetAllEta', 'twplus_tfJetAllEta']
+            #mom_weightList = ['pp_tt_llbb_tfJetAllEta']
             renorm_factors = {'pp_Z_llbb_simple_tfJetAllEta':'2968.5', 'pp_zh_llbb_simple_tfJetAllEta':'28.6', 'pp_zz_llbb_simple_tfJetAllEta':'49.4', 'pp_tt_llbb_tfJetAllEta':'11935.3', 'twminus_tfJetAllEta':'190.6', 'twplus_tfJetAllEta':'194.4'}
             #renorm_factors = {'pp_Z_llbb_simple_tfJetAllEta':'2.28e-12', 'pp_zh_llbb_simple_tfJetAllEta':'0.01606e-12', 'pp_zz_llbb_simple_tfJetAllEta':'0.09273e-12', 'pp_tt_llbb_tfJetAllEta':'5.686e-12', 'twminus_tfJetAllEta':'0.3218e-12', 'twplus_tfJetAllEta':'0.3212e-12'}
-            def generateWeightFromtreePlot(name):
+            def generateWeightFromtreePlot(name, stringForArcTanCombined):
                 return [
                         {
                         'name': name+'_minLog_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
@@ -1240,6 +1241,12 @@ class BasePlotter:
                         'variable': name+'_time',
                         'plot_cut': self.totalCut,
                         'binning': '(90, 0, 3)'
+                        },
+                        {
+                        'name': 'combinedArcTan_'+name+'_vs_all_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': stringForArcTanCombined,
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 0, 1)'
                         },
                         ]
             def generateAtanWeightPlot(name1, name2):
@@ -1330,10 +1337,15 @@ class BasePlotter:
                 stringForPonderatedWeightProduct += "(-log10(" + mom_weight +"_weight/%s))*"%renorm_factors[mom_weight]
                 self.momemta_weights_plot.extend(generateWeightPlot(mom_weight))
                 self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer(mom_weight))
-                self.momemta_weights_fromtree_plot.extend(generateWeightFromtreePlot(mom_weight))
+                stringForArcTanCombined = "-log10(" + mom_weight +"_weight)"
+                secondTermInArcTanCombined = ""
                 for mom_weight_bis in mom_weightList:
                     if mom_weight != mom_weight_bis :
+                        secondTermInArcTanCombined += mom_weight_bis +"_weight+"
                         self.momemta_combine_plot.extend(generateAtanWeightPlot(mom_weight, mom_weight_bis))
+                secondTermInArcTanCombined = '-log10(('+secondTermInArcTanCombined[:-1]+')/%s.)'%(len(mom_weightList)-1)
+                stringForArcTanCombined = '(std::atan('+stringForArcTanCombined+'-('+secondTermInArcTanCombined+'))+1.6)/3.2'
+                self.momemta_weights_fromtree_plot.extend(generateWeightFromtreePlot(mom_weight, stringForArcTanCombined))
             stringForLogWeightSum = stringForLogWeightSum[:-1]
             stringForWeightSum = '-log10('+stringForWeightSum[:-1]+')'
             stringForWeightProduct = stringForWeightProduct[:-1]
