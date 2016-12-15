@@ -37,6 +37,7 @@ for file in fileList:
     samplesDict[sampleName].append(os.path.join(currentDir, args.directory, file))
 
 for sampleName in samplesDict.keys():
+    print "Getting father DB sample : %s"%sampleName
     father_db_sample = get_sample(unicode(sampleName)) # Construct the new sample from his father
     nevents = 0
     db_fileList = []
@@ -62,10 +63,10 @@ for sampleName in samplesDict.keys():
     db_sample.processed_lumi = father_db_sample.processed_lumi
     db_sample.user_comment = father_db_sample.user_comment 
     db_sample.source_dataset_id = father_db_sample.source_dataset_id
-    #dbstore.add(db_sample)
+    dbstore.add(db_sample)
     print "Will add the following sample to the database :"
-    #print db_sample
+    print db_sample
     print "\n"
-#dbstore.commit()
+dbstore.commit()
 
 

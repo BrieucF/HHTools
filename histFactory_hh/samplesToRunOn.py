@@ -1,11 +1,12 @@
 # Warning: put most recent tags first!
 analysis_tags = [
         #'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3',
-        'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1',
+        #'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1',
+        'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_skim_addWeight_v2',
         ]
 analysis_tags_for_evt_perJob = [
-        'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1',
-        #'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3',
+        #'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1',
+        'v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3',
         ]
 
 Samples = []

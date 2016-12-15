@@ -31,6 +31,8 @@ for plot in plots :
     branch["name"] = plot["name"].split("_"+flavour)[0]
     branch["variable"] = plot["variable"]
     tree["branches"].append(branch)
+    if "tfJetAllEta_weight" in branch["name"] :
+        branch["type"] = "double"
     
 for banch in tree["branches"] :
     print banch

@@ -68,9 +68,9 @@ def generate_weight_code(basePlotter):
                 "mumu": [],
     }
     weightFromTree_glob = True
-    weightFileDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/treeFactory_hh/weightProd_v0/condor/output/"
-    weightTagVersion = "v0.1.5?76X_HHAnalysis_v1.0?765_MISearch_2016-08-10.v3"
-    currentTagVersion = "v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3"
+    weightFileDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/treeFactory_hh/weightProd_v1/condor/output/"
+    weightTagVersion = "v0.1.5?76X_HHAnalysis_v1.0?765_MISearch_2016-08-10.v3"#"v0.1.5?76X_HHAnalysis_v1.0?765_MISearch_2016-08-10.v3"  # Tag appended to the actual rootFiles in the directory (we will replace currentTagVersion by weightTagVersion to do the TChain
+    currentTagVersion = "v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3"#"v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3" # Tag of the sample names we run on for this production 
     if weightFromTree_glob :
         globals.code_before_loop += "   std::string dataset_name = m_dataset.db_name;\n"
         globals.code_before_loop += '   std::string weight_tag_version = "%s";\n'%weightTagVersion
@@ -135,25 +135,27 @@ def generate_weight_code(basePlotter):
     #        globals.code_in_loop_per_category[category].append("""          std::cout << "Start computing weight %s" << std::endl;\n"""% (nameWithFlavour))
             globals.code_in_loop_per_category[category].append("""          %s = system_clock::now();\n"""%weightsStartTimeName)
             if weightFromTree :
-                globals.code_in_loop_per_category[category].append("""          if (weightFileExists && gotEntryWithIndex != -1){\n""")
+                #globals.code_in_loop_per_category[category].append("""          if (weightFileExists && gotEntryWithIndex != -1){\n"""%name)
+                globals.code_in_loop_per_category[category].append("""          if (weightFileExists && gotEntryWithIndex != -1 && %s_weight_fromTree != 0){\n"""%name)
                 globals.code_in_loop_per_category[category].append("                %s = {std::make_pair(%s_weight_fromTree, %s_weightError_fromTree)};\n"% (weightsName, name, name))
                 globals.code_in_loop_per_category[category].append("                %s = %s_IntegStatus_fromTree;"%(weightsIntegStatusName, name))
-                globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": took weight %s from tree." << std::endl;\n'%(name))
+                #globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": took weight %s from tree : " << %s_weight_fromTree << std::endl;\n'%(name, name))
                 globals.code_in_loop_per_category[category].append("            }\n")
                 globals.code_in_loop_per_category[category].append("            else {\n")
-                globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": need to compute weight %s." << std::endl;\n'%(name))
+                #globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": need to compute weight %s." << std::endl;\n'%(name))
                 globals.code_in_loop_per_category[category].append("                %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
                 globals.code_in_loop_per_category[category].append("                %s = (%s.getIntegrationStatus() == MoMEMta::IntegrationStatus::SUCCESS);\n"%(weightsIntegStatusName, weightComputerName))
                 globals.code_in_loop_per_category[category].append("            }\n")
             else :
-                globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": compute weight %s (did not ask taking it from tree)." << std::endl;\n'%(name))
+                #globals.code_in_loop_per_category[category].append('                std::cout << "Event : " << event_run << " " << event_event << ": compute weight %s (did not ask taking it from tree)." << std::endl;\n'%(name))
                 globals.code_in_loop_per_category[category].append("                %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
                 globals.code_in_loop_per_category[category].append("                %s = %s.computeWeights(%s);\n"% (weightsName, weightComputerName, computeWeight_input))
                 globals.code_in_loop_per_category[category].append("                %s = (%s.getIntegrationStatus() == MoMEMta::IntegrationStatus::SUCCESS);\n"%(weightsIntegStatusName, weightComputerName))
 
             globals.code_in_loop_per_category[category].append("""          %s = system_clock::now();\n"""%weightsEndTimeName)
             globals.code_in_loop_per_category[category].append("""          %s = (std::chrono::duration_cast<seconds>(%s - %s).count())/60.0;\n"""%(weightsTimeName, weightsEndTimeName, weightsStartTimeName))
-            globals.code_in_loop_per_category[category].append("            if (%s.at(0).first == 0) %s = { std::make_pair(std::numeric_limits<double>::min(), 0) };\n"% (weightsName, weightsName))
+            globals.code_in_loop_per_category[category].append("""            if (%s.at(0).first == 0) {std::cout<< "Zero results" << std::endl; %s = { std::make_pair(std::numeric_limits<double>::min(), 0) };}\n"""% (weightsName, weightsName))
+            #globals.code_in_loop_per_category[category].append("""            std::cout << "Event : " << event_run << " " << event_event << ": computed %s = " << %s.at(0).first << std::endl;\n"""%(name, weightsName))
             globals.code_in_loop_per_category[category].append("\n")
 
     #newConfig("dy_tradeElep2ForZMass_Jet_ba_ec_Ele_ba_Mu_ba", {} , "dy")
