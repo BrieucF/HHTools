@@ -13,7 +13,7 @@ parser.add_argument('--blinded', dest='unblinded', help='If you want to produce 
 args = parser.parse_args()
 
 baseDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/"
-fileName = baseDir + args.directory + "/condor/output/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3skim_addWeight_v1_histos.root"
+fileName = baseDir + args.directory + "/condor/output/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4_v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3_skim_addWeight_v2_histos.root"
 
 skim = False
 
@@ -234,6 +234,12 @@ for key in keys:
             plot.update(defaultStyle_events)
         elif "cosThetaStar" in key.GetName():
             plot['x-axis'] = "cos(#theta^{*}_{CS})_{lljj#slash{E}_{T}}"
+            plot.update(defaultStyle_events)
+        elif "pp_Z_" in key.GetName():
+            plot['x-axis'] = "-log10(W_{DY})"
+            plot.update(defaultStyle_events)
+        elif "arcTan_twplus_tfJetAllEta_minus_twminus_tfJet" in key.GetName():
+            plot['x-axis'] = "ArcTan(-log10(W_{tW^{+}}/W_{tW^{-}})+pi/2)/pi"
             plot.update(defaultStyle_events)
         
         # Here be dragons

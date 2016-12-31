@@ -19,6 +19,8 @@ dbstore = DbStore()
 parser = argparse.ArgumentParser(description='Facility to add skimmed production to the DB.')
 parser.add_argument('-d', '--directory', dest='directory', help='Name of the directory where are rootFile to be added to the db.')
 parser.add_argument('-s', '--suffix', dest='suffix', default = '_skimmed', help='Suffix to append to the Sample name in the DB.')
+parser.add_argument('-r', '--replace', dest='str_to_replace', default = '', help='String to be replace (if you want) by suffix in the baseName.')
+parser.add_argument('-f', '--flat', dest='flat', help='If we run on flat tree (already hadded)', action = "store_true")
 args = parser.parse_args()
 
 def get_sample(name):
@@ -28,10 +30,16 @@ def get_sample(name):
 code_version = unicode("HHTools_MIS_RUN_II_" + subprocess.check_output(["git", "rev-parse", "HEAD"]).replace("\n",""))
 
 currentDir = os.getcwd()+"/"
-fileList = [file for file in os.listdir(args.directory) if "histos_" in file]
+if args.flat :
+    fileList = [file for file in os.listdir(args.directory) if "histos.root" in file]
+else :
+    fileList = [file for file in os.listdir(args.directory) if "histos_" in file]
 samplesDict = {}
 for file in fileList:
-    sampleName = file.split("_histos_")[0]
+    sampleName = file.split("_histos")[0]
+    if sampleName.startswith("DYbb") or sampleName.startswith("DYbx") or sampleName.startswith("DYxx") : 
+        fileList.remove(file)
+        continue
     if not sampleName in samplesDict.keys():
         samplesDict[sampleName] = []
     samplesDict[sampleName].append(os.path.join(currentDir, args.directory, file))
@@ -48,7 +56,7 @@ for sampleName in samplesDict.keys():
         temp_nevent = rootTree.GetEntries()
         nevents += temp_nevent
         db_fileList.append(File(unicode(fileName), u"", 0, u"{}", temp_nevent))
-    db_sample = Sample(unicode(sampleName + args.suffix), unicode(os.path.join(currentDir, args.directory)), u'SKIM', nevents)
+    db_sample = Sample(unicode((sampleName + args.suffix).replace(args.str_to_replace, "")), unicode(os.path.join(currentDir, args.directory)), u'SKIM', nevents)
     for db_file in db_fileList :
         db_sample.files.add(db_file)
     db_sample.source_sample_id = father_db_sample.sample_id
@@ -67,6 +75,7 @@ for sampleName in samplesDict.keys():
     print "Will add the following sample to the database :"
     print db_sample
     print "\n"
+    #dbstore.rollback()
 dbstore.commit()
 
 

@@ -94,24 +94,10 @@ class BasePlotter:
     def generatePlots(self, categories = ["All"], stage = "cleaning_cut", requested_plots = [], weights = ['trigeff', 'jjbtag', 'llidiso', 'pu'], extraCut = "", systematic = "nominal", extraString = ""):
 
         # MVA evaluation : ugly but necessary part
-        baseStringForMVA_part1 = 'evaluateMVA("/home/fynu/sbrochet/scratch/Framework/CMSSW_7_6_5/src/cp3_llbb/HHTools//mvaTraining_hh/weights/BDTNAME_kBDT.weights.xml", '
-        baseStringForMVA_part2 = '{{"jj_pt", %s}, {"ll_pt", %s}, {"ll_M", %s}, {"ll_DR_l_l", %s}, {"jj_DR_j_j", %s}, {"llmetjj_DPhi_ll_jj", %s}, {"llmetjj_minDR_l_j", %s}, {"llmetjj_MTformula", %s}})' % ( self.jj_str + ".Pt()", self.ll_str + ".Pt()", self.ll_str + ".M()", self.baseObject + ".DR_l_l", self.baseObject + ".DR_j_j", self.baseObject + ".minDR_l_j", self.baseObject + ".DPhi_ll_jj", self.baseObject + ".MT_formula")
+        baseStringForMVA_part1 = 'evaluateMVA("/home/fynu/sbrochet/scratch/Framework/CMSSW_7_6_5/src/cp3_llbb/HHTools//mvaTraining_hh/weights/BDTNAME", '
+        baseStringForMVA_part2 = '{{"pp_tt_llbb_tfJetAllEta_minLog_weight", pp_tt_llbb_tfJetAllEta_minLog_weight}, {"pp_Z_llbb_simple_tfJetAllEta_minLog_weight", pp_Z_llbb_simple_tfJetAllEta_minLog_weight}, {"pp_zz_llbb_simple_tfJetAllEta_minLog_weight", pp_zz_llbb_simple_tfJetAllEta_minLog_weight}, {"twplus_tfJetAllEta_minLog_weight", twplus_tfJetAllEta_minLog_weight}, {"twminus_tfJetAllEta_minLog_weight", twminus_tfJetAllEta_minLog_weight}, {"pp_zh_llbb_simple_tfJetAllEta_minLog_weight", pp_zh_llbb_simple_tfJetAllEta_minLog_weight}})'
         stringForMVA = baseStringForMVA_part1 + baseStringForMVA_part2
         
-        # The following will need to be modified each time the name of the BDT output changes
-        bdtNameTemplate = "DATE_BDT_NODE_SUFFIX"
-        
-        # v1 benchmark BDTs (w/ LO DY)
-        #date = "2016_05_27"
-        #nodes = ["SM", "box", "5", "8", "13", "all"]
-        
-        date = "2016_07_05"
-        
-        suffixes = ["VS_TT_DYHTonly_tW_8var"]
-        BDToutputs = {}
-        bdtNames = []
-        BDToutputsVariable = {}
-
         # Possible stages (selection)
         mll_cut = "((91 - {0}.M()) > 15)".format(self.ll_str)
         dict_stage_cut = {
@@ -120,11 +106,22 @@ class BasePlotter:
                "zero_ttweight": "(pp_tt_llbb_tfJetAllEta_minLog_weight > 40)",
                "nonzero_ttweight": "(pp_tt_llbb_tfJetAllEta_minLog_weight < 40)",
                }
-        # High-BDT stages
+
+        # The following will need to be modified each time the name of the BDT output changes
+        #bdtNameTemplate = "BDT_PROC_vs_All_relativeWeight_absEvtWeight_kBDT.weights.xml"
+        bdtNameTemplate = "BDT_PROC_vs_All_SUFFIX_kBDT.weights.xml"
+        suffixes = ["relativeWeight_absEvtWeight"]
+        procs = ["DY", "TT", "ZZ", "tWm", "tWp", "ZH"]
+        
+        BDToutputs = {}
+        bdtNames = []
+        BDToutputsVariable = {}
         for suffix in suffixes:
-            bdtName = bdtNameTemplate.replace("DATE", date).replace("SUFFIX", suffix)
-            BDToutput = baseStringForMVA_part1.replace("BDTNAME", bdtName) + baseStringForMVA_part2
-            dict_stage_cut["highBDT_node_"] = self.joinCuts(BDToutput + ">0", mll_cut)
+            for proc in procs:
+                bdtName = bdtNameTemplate.replace("PROC", proc).replace("SUFFIX", suffix)
+                BDToutput = baseStringForMVA_part1.replace("BDTNAME", bdtName) + baseStringForMVA_part2
+                bdtNames.append(bdtName)
+                BDToutputsVariable[bdtName] = BDToutput
 
         # Categories (lepton flavours) and trigger requirement
         self.dict_cat_cut =  {
@@ -177,10 +174,10 @@ class BasePlotter:
         # BTAG SF
         jjBtag_sfIdx = "[0]"
         jjBtag_strCommon="NOMINAL"
-        if systematic == "jjbtagup":
+        if systematic == "jjbtagup" or systematic == "jjbtagtightup":
             jjBtag_sfIdx = "[2]" 
             jjBtag_strCommon="UP"
-        if systematic == "jjbtagdown":
+        if systematic == "jjbtagdown" or systematic == "jjbtagtightdown":
             jjBtag_sfIdx = "[1]"
             jjBtag_strCommon="DOWN"
         # propagate jecup etc to the framework objects
@@ -188,6 +185,8 @@ class BasePlotter:
         if "jec" in systematic or "jer" in systematic:
             sys_fwk = "_" + systematic
         jjBtag_sf = "(common::combineScaleFactors<2>({{{{{{ jet{0}_sf_csvv2_{1}[{2}][0] , jet{0}_sf_csvv2_{1}[{2}]{3} }}, {{ jet{0}_sf_csvv2_{1}[{4}][0] , jet{0}_sf_csvv2_{1}[{4}]{3} }}}}}}, {{{{1, 0}}, {{0, 1}}}}, common::Variation::{5}) )".format(sys_fwk, self.btagWP_str, self.jet1_fwkIdx, jjBtag_sfIdx, self.jet2_fwkIdx, jjBtag_strCommon)
+        # For skimmer btagM but where you want to keep tight WP SF
+        jjbtagtightWeight = "(({6}.size() == 0)? 1 : common::combineScaleFactors<2>({{{{{{ jet{0}_sf_csvv2_{1}[{2}][0] , jet{0}_sf_csvv2_{1}[{2}]{3} }}, {{ jet{0}_sf_csvv2_{1}[{4}][0] , jet{0}_sf_csvv2_{1}[{4}]{3} }}}}}}, {{{{1, 0}}, {{0, 1}}}}, common::Variation::{5}) )".format(sys_fwk, self.btagWP_str, self.jet1_fwkIdx, jjBtag_sfIdx, self.jet2_fwkIdx, jjBtag_strCommon, self.baseObject[:-3])
 
         # PU WEIGHT
         puWeight = "event_pu_weight"
@@ -247,18 +246,23 @@ class BasePlotter:
         self.jet_tf_plot = []
         self.mu_tf_plot = []
         self.el_tf_plot = []
+        self.momemta_weights_cloner_plot = []
         self.momemta_weights_skimmer_plot = []
         self.momemta_weights_plot = []
         self.momemta_weights_fromtree_plot = []
         self.momemta_combine_plot = []
+
+        self.one_vs_all_plot = []
         
         #MIS stuff 
         self.mis_plot = []
 
+        # weights
         self.llidisoWeight_plot = []
         self.mumuidisoWeight_plot = []
         self.elelidisoWeight_plot = []
         self.jjbtagWeight_plot = []
+        self.jjbtagtightWeight_plot = []
         self.trigeffWeight_plot = []
         self.puWeight_plot = []
         self.scaleWeight_plot = []
@@ -313,11 +317,7 @@ class BasePlotter:
             # BDT output plots
             for bdtName in bdtNames:
                 bdtRange = (-0.6, 0.6) # default BDT range
-                # Special BDT ranges
-                if "BDT_SM" in bdtName: bdtRange = (-0.5, 0.5)
-                if "BDT_2" in bdtName: bdtRange = (-0.5, 0.6)
-
-                self.bdtoutput_plot.append({
+                self.one_vs_all_plot.append({
                         'name': 'MVA_%s_%s_%s_%s%s' % (bdtName, self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': BDToutputsVariable[bdtName],
                         'plot_cut': self.totalCut,
@@ -327,6 +327,9 @@ class BasePlotter:
             # Weight Plots
             self.jjbtagWeight_plot.append(
                         {'name': 'jjbtag_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': available_weights["jjbtag"],
+                        'plot_cut': self.totalCut, 'binning':'(100, 0, 1.5)', 'weight': 'event_weight'})
+            self.jjbtagtightWeight_plot.append(
+                        {'name': 'jjbtagtight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': jjbtagtightWeight,
                         'plot_cut': self.totalCut, 'binning':'(100, 0, 1.5)', 'weight': 'event_weight'})
             self.llidisoWeight_plot.append(
                         {'name': 'llidiso_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': available_weights["llidiso"],
@@ -1208,6 +1211,12 @@ class BasePlotter:
                         }, 
                         {
                         'name': name+'_punderated_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_weight/%s'%renorm_factors[name],
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 0, 1e-15)'
+                        }, 
+                        {
+                        'name': name+'_minLog_punderated_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "-log10("+name+'_weight/%s)'%renorm_factors[name],
                         'plot_cut': self.totalCut,
                         'binning': '(80, 15, 40)'
@@ -1276,19 +1285,19 @@ class BasePlotter:
                         'name': name+'_minLog_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "-log10({0}_weights.at(0).first)".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 10, 40)'
+                        'binning': '(80, 10, 50)'
                         }, 
                         {
                         'name': name+'_minLog_weight_up_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "-log10({0}_weights.at(0).first + {0}_weights.at(0).second)".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 10, 40)'
+                        'binning': '(80, 10, 50)'
                         }, 
                         {
                         'name': name+'_minLog_weight_down_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': "-log10({0}_weights.at(0).first - {0}_weights.at(0).second)".format(name),
                         'plot_cut': self.totalCut,
-                        'binning': '(80, 10, 40)'
+                        'binning': '(80, 10, 50)'
                         }, 
                         {
                         'name': name+'_weightRelError_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
@@ -1310,6 +1319,21 @@ class BasePlotter:
                         },
                         ]
             def generateWeightPlot_skimmer(name):
+                return [
+                        {
+                        'name': name+'_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_weight',
+                        'plot_cut': self.totalCut,
+                        'binning': '(80, 0, 1e-15)'
+                        }, 
+                        {
+                        'name': name+'_weightError_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': name+'_weightError',
+                        'plot_cut': self.totalCut,
+                        'binning': '(100, 0, 1)'
+                        },
+                        ]
+            def generateWeightPlot_cloner(name):
                 return [
                         {
                         'name': name+'_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
@@ -1336,6 +1360,7 @@ class BasePlotter:
                 stringForPonderatedWeightSum += "(" + mom_weight +"_weight/%s)+"%renorm_factors[mom_weight]
                 stringForPonderatedWeightProduct += "(-log10(" + mom_weight +"_weight/%s))*"%renorm_factors[mom_weight]
                 self.momemta_weights_plot.extend(generateWeightPlot(mom_weight))
+                self.momemta_weights_cloner_plot.extend(generateWeightPlot_cloner(mom_weight))
                 self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer(mom_weight))
                 stringForArcTanCombined = "-log10(" + mom_weight +"_weight)"
                 secondTermInArcTanCombined = ""

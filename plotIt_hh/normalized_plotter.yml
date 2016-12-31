@@ -2,8 +2,8 @@ configuration:
     include: ['centralConfig.yml']
 
 files:
-    include: ['compare_zero_results.yml']
-    #include: ['normalized_MCFiles.yml']
+    #include: ['compare_zero_results.yml']
+    include: ['normalized_MCFiles.yml']
 
 plots:
     include: ['allPlots.yml']

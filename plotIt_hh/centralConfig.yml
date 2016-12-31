@@ -10,7 +10,8 @@ extra-label: "Preliminary"
 
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/weightPlot_v3/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/combinedArcTan/condor/output/'
-root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/weightPlot_btagTight_and_ZeroResults/condor/output/'
+#root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/weightPlot_v4/condor/output/'
+root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/weightPlot_v4/condor/output/'
 
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/firstTTbarAndZZWeights/condor/output/'
 #root: '/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/histFactory_hh/ttWeight_noTF_NWAtrue_more/condor/output/'

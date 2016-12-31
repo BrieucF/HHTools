@@ -154,9 +154,11 @@ mySub = condorSubmitter(samples, "%s/build/" % args.output + executable, "DUMMY"
 ## Create test_condor directory and subdirs
 mySub.setupCondorDirs()
 
-#for sample in mySub.sampleCfg[:]:
-#    if 'TT_TuneCUETP8M1_13TeV-powheg-pythia8' in sample["db_name"]:
-#        sample["json_skeleton"][sample["db_name"]]["cross-section"] = 746.
+for sample in mySub.sampleCfg[:]:
+    if 'TTTo2L2Nu_13TeV-powheg_Fall15MiniAODv2' in sample["db_name"]:
+        sample["json_skeleton"][sample["db_name"]]["cross-section"] = sample["json_skeleton"][sample["db_name"]]["cross-section"]*0.954
+    if 'DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4' in sample["db_name"]:
+        sample["json_skeleton"][sample["db_name"]]["cross-section"] = sample["json_skeleton"][sample["db_name"]]["cross-section"]*0.782
 
 splitTT = False
 splitDY = True

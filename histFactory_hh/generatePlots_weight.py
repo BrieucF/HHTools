@@ -66,7 +66,7 @@ for systematicType in systematics.keys():
         ## No mll cut
         #plots.extend(basePlotter_llbb.generatePlots(categories_llbb, stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = plots_llbb))
         #plots.extend(basePlotter_llbb.generatePlots(["All"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "mjj", "basic", "bdtinput", "ht", "other", 'csv', 'flavour', "mis", "isElEl", "evt", "momemta_weights_fromtree", "momemta_combine"], extraString=""))
-        plots.extend(basePlotter_llbb.generatePlots(["All"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["momemta_weights_fromtree", "momemta_combine"], extraString=""))
+        plots.extend(basePlotter_llbb.generatePlots(["All"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["momemta_weights_fromtree", "momemta_combine", "one_vs_all"], extraString=""))
         #basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_pt", btagWP_str = 'medium', objects = objects)
         #plots.extend(basePlotter_llbb.generatePlots(["All", "MuMu", "ElEl", "MuEl", "SF"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "basic", "mjj", "csv", "bdtinput", "isElEl"], extraString=""))
         #basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = objects)
