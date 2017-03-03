@@ -18,7 +18,7 @@ dbstore = DbStore()
 
 parser = argparse.ArgumentParser(description='Facility to add skimmed production to the DB.')
 parser.add_argument('-d', '--directory', dest='directory', help='Name of the directory where are rootFile to be added to the db.')
-parser.add_argument('-s', '--suffix', dest='suffix', default = '_skimmed', help='Suffix to append to the Sample name in the DB.')
+parser.add_argument('-s', '--suffix', dest='suffix', default = '_skimmed', help='Suffix to append to the Sample name in the DB (add the underscore to have pretty name).')
 parser.add_argument('-r', '--replace', dest='str_to_replace', default = '', help='String to be replace (if you want) by suffix in the baseName.')
 parser.add_argument('-f', '--flat', dest='flat', help='If we run on flat tree (already hadded)', action = "store_true")
 args = parser.parse_args()

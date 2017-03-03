@@ -32,4 +32,7 @@
   fill-color: '#145a32' #'#6A4A3C'
 'Data':
   legend: 'Data'
+'SM':
+    legend: 'SM'
+    fill-color: '#d3d3d3'
     

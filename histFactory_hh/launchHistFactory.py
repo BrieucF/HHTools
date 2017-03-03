@@ -62,6 +62,7 @@ parser.add_argument('-p', '--plotter', dest='plotter', default="generatePlots.py
 parser.add_argument('-r', '--remove', help='Overwrite output directory if it already exists.', action="store_true")
 parser.add_argument('--skip', help='Skip the building part.', action="store_true")
 parser.add_argument('--tree', dest='treeFactory', action='store_true', default=False, help='Use treeFactory instead of histFactory')
+parser.add_argument('--reweight', dest='reweight', default=True, help='Applying reweighting to the DY and TT TH1s')
 
 args = parser.parse_args()
 
@@ -154,11 +155,6 @@ mySub = condorSubmitter(samples, "%s/build/" % args.output + executable, "DUMMY"
 ## Create test_condor directory and subdirs
 mySub.setupCondorDirs()
 
-for sample in mySub.sampleCfg[:]:
-    if 'TTTo2L2Nu_13TeV-powheg_Fall15MiniAODv2' in sample["db_name"]:
-        sample["json_skeleton"][sample["db_name"]]["cross-section"] = sample["json_skeleton"][sample["db_name"]]["cross-section"]*0.954
-    if 'DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4' in sample["db_name"]:
-        sample["json_skeleton"][sample["db_name"]]["cross-section"] = sample["json_skeleton"][sample["db_name"]]["cross-section"]*0.782
 
 splitTT = False
 splitDY = True
@@ -205,12 +201,12 @@ if args.filter:
 
         if splitDY and 'DYJetsToLL_' in sample["db_name"]:
             print "Splitting DY flavour content."
-            print '\033[93m'+"Careful!!!! We use hh_llmetjj_HWWleptons_btagM_csv[0].gen_**"+'\033[0m'
+            print '\033[93m'+"Careful!!!! We use hh_llmetjj_HWWleptons_btagT_csv[0].gen_**"+'\033[0m'
             # DY bb
             dy_bb_sample = copy.deepcopy(sample)
             dy_bb_sample["db_name"] = dy_bb_sample["db_name"].replace("DYJets", "DYbb")
             newJson = copy.deepcopy(sample["json_skeleton"][sample["db_name"]])
-            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagM_csv[0].gen_bb)"
+            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagT_csv[0].gen_bb)"
             dy_bb_sample["json_skeleton"][dy_bb_sample["db_name"]] = newJson
             dy_bb_sample["json_skeleton"].pop(sample["db_name"])
             mySub.sampleCfg.append(dy_bb_sample)
@@ -219,7 +215,7 @@ if args.filter:
             dy_bx_sample = copy.deepcopy(sample)
             dy_bx_sample["db_name"] = dy_bx_sample["db_name"].replace("DYJets", "DYbx")
             newJson = copy.deepcopy(sample["json_skeleton"][sample["db_name"]])
-            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagM_csv[0].gen_bl || hh_llmetjj_HWWleptons_btagM_csv[0].gen_bc)"
+            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagT_csv[0].gen_bl || hh_llmetjj_HWWleptons_btagT_csv[0].gen_bc)"
             dy_bx_sample["json_skeleton"][dy_bx_sample["db_name"]] = newJson
             dy_bx_sample["json_skeleton"].pop(sample["db_name"])
             mySub.sampleCfg.append(dy_bx_sample)
@@ -228,7 +224,7 @@ if args.filter:
             dy_xx_sample = copy.deepcopy(sample)
             dy_xx_sample["db_name"] = dy_xx_sample["db_name"].replace("DYJets", "DYxx")
             newJson = copy.deepcopy(sample["json_skeleton"][sample["db_name"]])
-            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagM_csv[0].gen_cc || hh_llmetjj_HWWleptons_btagM_csv[0].gen_cl || hh_llmetjj_HWWleptons_btagM_csv[0].gen_ll)"
+            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagT_csv[0].gen_cc || hh_llmetjj_HWWleptons_btagT_csv[0].gen_cl || hh_llmetjj_HWWleptons_btagT_csv[0].gen_ll)"
             dy_xx_sample["json_skeleton"][dy_xx_sample["db_name"]] = newJson
             dy_xx_sample["json_skeleton"].pop(sample["db_name"])
             mySub.sampleCfg.append(dy_xx_sample)
@@ -244,6 +240,15 @@ if args.filter:
 
         #if 'WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8' in sample["db_name"]:
         #    sample["json_skeleton"][sample["db_name"]]["sample_cut"] = "event_ht < 100"
+
+if args.reweight :
+    for sample in mySub.sampleCfg[:]:
+        if 'TTTo2L2Nu_13TeV-powheg_Fall15MiniAODv2' in sample["db_name"]:
+            sample["json_skeleton"][sample["db_name"]]["sample-weight"] = "tt"
+            #sample["json_skeleton"][sample["db_name"]]["cross-section"] = sample["json_skeleton"][sample["db_name"]]["cross-section"]*0.9543
+        if 'ToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8_extended_ext0_plus_ext1_plus_ext4' in sample["db_name"]:
+            sample["json_skeleton"][sample["db_name"]]["sample-weight"] = "dy"
+            #sample["json_skeleton"][sample["db_name"]]["cross-section"] = sample["json_skeleton"][sample["db_name"]]["cross-section"]*0.78114
 
 ## Write command and data files in the condor directory
 mySub.createCondorFiles()

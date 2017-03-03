@@ -33,6 +33,9 @@ plots = []
 
 # Needed to evaluate MVA outputs
 #includes.append( os.path.join(scriptDir, "..", "common", "readMVA.h") )
+include_directories = []
+include_directories.append(os.path.join(scriptDir, "..", "common"))
+headers = ["readMVA.h"]
 
 # Plot configuration
 
@@ -52,7 +55,6 @@ plots_llbb = plots_lljj
 systematics = {"modifObjects" : ["nominal"]}
 #systematics = {"modifObjects" : ["nominal", "jecup", "jecdown", "jerup", "jerdown"], "SF" : ["elidisoup", "elidisodown", "muidup", "muiddown", "muisoup", "muisodown", "jjbtagup", "jjbtagdown", "puup", "pudown", "trigeffup", "trigeffdown", "pdfup", "pdfdown", "scale", "scaleUncorr"]}
 #systematics = {"modifObjects" : ["nominal"], "SF" : ["scale"]}
-
 for systematicType in systematics.keys():
     
     for systematic in systematics[systematicType]:
@@ -62,13 +64,27 @@ for systematicType in systematics.keys():
             objects = "nominal" #ensure that we use normal hh_objects for systematics not modifying obect such as scale factors 
 
         ## llbb 
-        basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = objects)      
+        basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagT_csv", btagWP_str = 'medium', objects = objects)      
         ## No mll cut
         #plots.extend(basePlotter_llbb.generatePlots(categories_llbb, stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = plots_llbb))
         #plots.extend(basePlotter_llbb.generatePlots(["All"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "mjj", "basic", "bdtinput", "ht", "other", 'csv', 'flavour', "mis", "isElEl", "evt", "momemta_weights_fromtree", "momemta_combine"], extraString=""))
-        plots.extend(basePlotter_llbb.generatePlots(["All"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["momemta_weights_fromtree", "momemta_combine", "one_vs_all"], extraString=""))
+        plots.extend(basePlotter_llbb.generatePlots(["All", "ElEl", "MuEl", "MuMu"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "mjj", "basic", "bdtinput", "ht", "other", 'csv', 'flavour', "mis", "isElEl", "evt", "momemta_weights_fromtree", "momemta_combine", "one_vs_all"], extraString=""))
+        #basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagT_csv", btagWP_str = 'tight', objects = objects)      
+        #plots.extend(basePlotter_llbb.generatePlots(["All", "ElEl", "MuEl", "MuMu"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "mjj", "basic", "bdtinput", "ht", "other", 'csv', 'flavour', "mis", "isElEl", "evt", "momemta_weights_fromtree", "momemta_combine", "one_vs_all"], extraString=""))
         #basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_pt", btagWP_str = 'medium', objects = objects)
         #plots.extend(basePlotter_llbb.generatePlots(["All", "MuMu", "ElEl", "MuEl", "SF"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "basic", "mjj", "csv", "bdtinput", "isElEl"], extraString=""))
         #basePlotter_llbb = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = objects)
         #plots.extend(basePlotter_llbb.generatePlots(["All", "MuMu", "ElEl", "MuEl", "SF"], stage_llbb, systematic = systematic, weights = weights_llbb, requested_plots = ["mll", "basic", "mjj", "csv", "bdtinput", "isElEl"], extraString=""))
        
+#print "\n Carefull!! \n We use \n %s \n for the lep flavour dependent reweighting !!!"%basePlotter_llbb.baseObject
+#sample_weights = {
+#        "dy": """
+#        ({0}.isMuMu*0.78511 + {0}.isElEl*0.73009)
+#        """.format(basePlotter_llbb.baseObject),
+#        "tt": """
+#        ({0}.isMuMu*0.97815 + {0}.isElEl*0.89008 + ({0}.isMuEl || {0}.isElMu)*0.95010)
+#        """.format(basePlotter_llbb.baseObject),
+#        }
+
+
+

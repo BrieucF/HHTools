@@ -94,8 +94,9 @@ class BasePlotter:
     def generatePlots(self, categories = ["All"], stage = "cleaning_cut", requested_plots = [], weights = ['trigeff', 'jjbtag', 'llidiso', 'pu'], extraCut = "", systematic = "nominal", extraString = ""):
 
         # MVA evaluation : ugly but necessary part
-        baseStringForMVA_part1 = 'evaluateMVA("/home/fynu/sbrochet/scratch/Framework/CMSSW_7_6_5/src/cp3_llbb/HHTools//mvaTraining_hh/weights/BDTNAME", '
+        baseStringForMVA_part1 = 'evaluateMVA("/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/ttbar_effth_delphes/analyzer/weights/BDTNAME", '
         baseStringForMVA_part2 = '{{"pp_tt_llbb_tfJetAllEta_minLog_weight", pp_tt_llbb_tfJetAllEta_minLog_weight}, {"pp_Z_llbb_simple_tfJetAllEta_minLog_weight", pp_Z_llbb_simple_tfJetAllEta_minLog_weight}, {"pp_zz_llbb_simple_tfJetAllEta_minLog_weight", pp_zz_llbb_simple_tfJetAllEta_minLog_weight}, {"twplus_tfJetAllEta_minLog_weight", twplus_tfJetAllEta_minLog_weight}, {"twminus_tfJetAllEta_minLog_weight", twminus_tfJetAllEta_minLog_weight}, {"pp_zh_llbb_simple_tfJetAllEta_minLog_weight", pp_zh_llbb_simple_tfJetAllEta_minLog_weight}})'
+        baseStringForMVA_part2 = '{{"pp_Z_llbb_simple_tfJetAllEta_minLog_weight", pp_Z_llbb_simple_tfJetAllEta_minLog_weight}, {"pp_tt_llbb_tfJetAllEta_minLog_weight", pp_tt_llbb_tfJetAllEta_minLog_weight}, {"pp_zz_llbb_simple_tfJetAllEta_minLog_weight", pp_zz_llbb_simple_tfJetAllEta_minLog_weight}, {"twplus_tfJetAllEta_minLog_weight", twplus_tfJetAllEta_minLog_weight}, {"twminus_tfJetAllEta_minLog_weight", twminus_tfJetAllEta_minLog_weight},  {"pp_zh_llbb_simple_tfJetAllEta_minLog_weight", pp_zh_llbb_simple_tfJetAllEta_minLog_weight}})'
         stringForMVA = baseStringForMVA_part1 + baseStringForMVA_part2
         
         # Possible stages (selection)
@@ -105,13 +106,15 @@ class BasePlotter:
                "mll_cut": mll_cut,
                "zero_ttweight": "(pp_tt_llbb_tfJetAllEta_minLog_weight > 40)",
                "nonzero_ttweight": "(pp_tt_llbb_tfJetAllEta_minLog_weight < 40)",
+               "2jets": "(hh_nJetsL == 2)",
+               "moreThan2jets": "(hh_nJetsL > 2)",
                }
 
         # The following will need to be modified each time the name of the BDT output changes
         #bdtNameTemplate = "BDT_PROC_vs_All_relativeWeight_absEvtWeight_kBDT.weights.xml"
         bdtNameTemplate = "BDT_PROC_vs_All_SUFFIX_kBDT.weights.xml"
         suffixes = ["relativeWeight_absEvtWeight"]
-        procs = ["DY", "TT", "ZZ", "tWm", "tWp", "ZH"]
+        procs = ["DY", "TT", "ZZ", "tWm", "tbarWp", "ZH"]
         
         BDToutputs = {}
         bdtNames = []
@@ -215,7 +218,7 @@ class BasePlotter:
         trigEff += "*(({0}.isElEl && runOnMC) ? 0.995 : 1)".format(self.baseObject)
         trigEff += "*(({0}.isMuMu && runOnMC) ? 0.95 : 1)".format(self.baseObject)
 
-        # Append the proper extension to the name plot if needed (scale name are down at the end of the code)
+        # Append the proper extension to the name plot if needed (scale name are below at the end of the code)
         self.systematicString = ""
         if not systematic == "nominal" and not "scale" in systematic:
             self.systematicString = "__" + systematic
@@ -318,7 +321,7 @@ class BasePlotter:
             for bdtName in bdtNames:
                 bdtRange = (-0.6, 0.6) # default BDT range
                 self.one_vs_all_plot.append({
-                        'name': 'MVA_%s_%s_%s_%s%s' % (bdtName, self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'name': '%s_%s_%s_%s%s' % (bdtName.replace("_kBDT.weights.xml","").replace("All", "all"), self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': BDToutputsVariable[bdtName],
                         'plot_cut': self.totalCut,
                         'binning': '(50, {}, {})'.format(bdtRange[0], bdtRange[1])
@@ -347,18 +350,24 @@ class BasePlotter:
                         {'name': 'pu_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': available_weights["pu"],
                         'plot_cut': self.totalCut, 'binning': '(100, 0, 4)', 'weight': 'event_weight'})
             self.scaleWeight_plot.extend([
-                        {'name': 'scale0_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "std::abs(event_scale_weights[0])",
+                        {'name': 'scale0_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_scale_weights[0]",
                         'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'},
-                        {'name': 'scale1_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "std::abs(event_scale_weights[1])",
+                        {'name': 'scale1_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_scale_weights[1]",
                         'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'},
-                        {'name': 'scale2_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "std::abs(event_scale_weights[2])",
+                        {'name': 'scale2_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_scale_weights[2]",
                         'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'},
-                        {'name': 'scale3_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "std::abs(event_scale_weights[3])",
+                        {'name': 'scale3_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_scale_weights[3]",
                         'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'},
-                        {'name': 'scale4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "std::abs(event_scale_weights[4])",
+                        {'name': 'scale4_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_scale_weights[4]",
                         'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'},
-                        {'name': 'scale5_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "std::abs(event_scale_weights[5])",
+                        {'name': 'scale5_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_scale_weights[5]",
                         'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'}])
+            self.pdfWeight_plot.extend([
+                {'name': 'event_pdf_weight_up_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_pdf_weight_up",
+                 'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'},
+                {'name': 'event_pdf_weight_down_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString,  self.systematicString), 'variable': "event_pdf_weight_down",
+                 'plot_cut': self.totalCut, 'binning': '(100, 0, 2)', 'weight': 'event_weight'}
+                    ])
                     
             # BASIC PLOTS
             self.basic_plot.extend([
@@ -691,13 +700,13 @@ class BasePlotter:
                         'name': 'jj_CSVprod_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': self.jet1_str+".CSV * " + self.jet2_str+".CSV",
                         'plot_cut': self.totalCut,
-                        'binning': '(25, 0, 1)'
+                        'binning': '(75, 0, 1)'
                 },
                 {
                         'name': 'jj_CSVsum_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                         'variable': self.jet1_str+".CSV + " + self.jet2_str+".CSV",
                         'plot_cut': self.totalCut,
-                        'binning': '(25, 0, 2)'
+                        'binning': '(75, 0, 2)'
                 },
                 #{
                 #        'name': 'jj_scaleFactor_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
@@ -855,7 +864,7 @@ class BasePlotter:
                     'binning': '(4, 0, 4)'
                 },
                 {
-                    'name': 'nJetsL_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                    'name': 'nJets_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
                     'variable': "hh_nJetsL",
                     'plot_cut': self.totalCut,
                     'binning': '(10, 0, 10)'
@@ -1251,33 +1260,51 @@ class BasePlotter:
                         'plot_cut': self.totalCut,
                         'binning': '(90, 0, 3)'
                         },
-                        {
-                        'name': 'combinedArcTan_'+name+'_vs_all_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': stringForArcTanCombined,
-                        'plot_cut': self.totalCut,
-                        'binning': '(80, 0, 1)'
-                        },
+                        #{
+                        #'name': 'combinedArcTan_'+name+'_vs_all_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': stringForArcTanCombined,
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(80, 0, 1)'
+                        #},
                         ]
             def generateAtanWeightPlot(name1, name2):
                 return [
                         {
                         'name': 'arcTanPunderated_'+name1+'_minus_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': '(std::atan(-log10(' + name1 + '_weight/%s) - -log10('%renorm_factors[name1] + name2 + '_weight/%s))+1.6)/3.2'%renorm_factors[name2],
+                        'variable': '(std::atan(log10(' + name1 + '_weight/%s)/('%renorm_factors[name1] + name2 + '_weight/%s))+1.571)/3.15'%renorm_factors[name2],
                         'plot_cut': self.totalCut,
                         'binning': '(90, 0, 1)'
                         },
-                        {
-                        'name': 'KDlikePunderated_'+name1+'_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': '1./(1.+((' + name1 + '_weight/%s)/('%renorm_factors[name1] + name2 + '_weight/%s)))'%renorm_factors[name2],
-                        'plot_cut': self.totalCut,
-                        'binning': '(90, 0, 1)'
-                        },
+                        #{
+                        #'name': 'KDlikePunderated_'+name1+'_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': '1./(1.+((' + name1 + '_weight/%s)/('%renorm_factors[name1] + name2 + '_weight/%s)))'%renorm_factors[name2],
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(90, 0, 1)'
+                        #},
+                        #{
+                        #'name': 'weightRatioPunderated_'+name1+'_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': '(' + name1 + '_weight/%s)/('%renorm_factors[name1] + name1 + '_weight/%s + '%renorm_factors[name1] + name2 + '_weight/%s)'%renorm_factors[name2],
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(90, 0, 1)'
+                        #},
                         {
                         'name': 'arcTan_'+name1+'_minus_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': '(std::atan('+name1+'_minLog_weight - '+name2+'_minLog_weight)+1.6)/3.2',
+                        'variable': '(std::atan(log10('+name1+'_weight / '+name2+'_weight))+1.571)/3.15',
                         'plot_cut': self.totalCut,
                         'binning': '(90, 0, 1)'
                         },
+                        #{
+                        #'name': 'sigmoid_weightRatio_'+name1+'_vs_'+name2+'_01_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': "1/(1+exp(-0.1*log10((" + name1 + "_weight)/("+ name2 + "_weight)" + ")))",
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(150, 0, 1)'
+                        #},
+                        #{
+                        #'name': 'sigmoid_punderatedWeightRatio_'+name1+'_vs_'+name2+'_01_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': "1/(1+exp(-0.1*log10((" + name1 + "_weight/%s)/("%renorm_factors[name1] + name2 + "_weight/%s))))"%renorm_factors[name2],
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(150, 0, 1)'
+                        #}
                         ]
             def generateWeightPlot(name):
                 return [
@@ -1364,16 +1391,92 @@ class BasePlotter:
                 self.momemta_weights_skimmer_plot.extend(generateWeightPlot_skimmer(mom_weight))
                 stringForArcTanCombined = "-log10(" + mom_weight +"_weight)"
                 secondTermInArcTanCombined = ""
+                
+                stringForSigmoidPunderatedWeightRatio = ""
+                stringForSigmoidWeightRatio = ""
+                
                 for mom_weight_bis in mom_weightList:
                     if mom_weight != mom_weight_bis :
+                        
+                        stringForSigmoidPunderatedWeightRatio += mom_weight_bis + "_weight/%s"%renorm_factors[mom_weight_bis] +"+"
+                        stringForSigmoidWeightRatio += mom_weight_bis + "_weight+"
+                        
                         secondTermInArcTanCombined += mom_weight_bis +"_weight+"
                         self.momemta_combine_plot.extend(generateAtanWeightPlot(mom_weight, mom_weight_bis))
+                
+                stringForSigmoidPunderatedWeightRatio ='(' + stringForSigmoidPunderatedWeightRatio[:-1] + ')'
+                variableForSigmoidPunderatedWeightRatio = "1/(1+exp(-0.3*log10((" + mom_weight + "_weight/%s)/%s)))"%(renorm_factors[mom_weight], stringForSigmoidPunderatedWeightRatio)
+                stringForSigmoidWeightRatio ='(' + stringForSigmoidWeightRatio[:-1] + ')'
+                variableForSigmoidWeightRatio = "1/(1+exp(-0.3*log10((" + mom_weight + "_weight)/%s)))"%stringForSigmoidWeightRatio
+                self.momemta_weights_fromtree_plot.extend([
+                        #{
+                        #'name': 'sigmoid_weightRatio_'+mom_weight+'_vs_allButOne_03_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': "1/(1+exp(-0.3*log10((" + mom_weight + "_weight)/(%s))))"%stringForSigmoidWeightRatio,
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(150, 0, 1)'
+                        #},
+                        #{
+                        #'name': 'sigmoid_punderatedWeightRatio_'+mom_weight+'_vs_allButOne_03_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': "1/(1+exp(-0.3*log10((" + mom_weight + "_weight/%s)/(%s))))"%(renorm_factors[mom_weight], stringForSigmoidPunderatedWeightRatio),
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(150, 0, 1)'
+                        #}
+                        {
+                        'name': 'arcTan_weightRatio_'+mom_weight+'_vs_allButOne_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': "(atan(log10((" + mom_weight + "_weight)/(%s)))+1.571)/3.15"%stringForSigmoidWeightRatio,
+                        'plot_cut': self.totalCut,
+                        'binning': '(150, 0, 1)'
+                        },
+                        {
+                        'name': 'arcTan_punderatedWeightRatio_'+mom_weight+'_vs_allButOne_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': "(atan(log10((" + mom_weight + "_weight/%s)/(%s)))+1.571)/3.15"%(renorm_factors[mom_weight], stringForSigmoidPunderatedWeightRatio),
+                        'plot_cut': self.totalCut,
+                        'binning': '(150, 0, 1)'
+                        }
+                        ])
+
                 secondTermInArcTanCombined = '-log10(('+secondTermInArcTanCombined[:-1]+')/%s.)'%(len(mom_weightList)-1)
-                stringForArcTanCombined = '(std::atan('+stringForArcTanCombined+'-('+secondTermInArcTanCombined+'))+1.6)/3.2'
+                #stringForArcTanCombined = '(std::atan('+stringForArcTanCombined+'-('+secondTermInArcTanCombined+'))+1.571)/3.15'
+                stringForArcTanCombined = '(std::atan(('+secondTermInArcTanCombined+') - (' + stringForArcTanCombined + '))+1.571)/3.15'
                 self.momemta_weights_fromtree_plot.extend(generateWeightFromtreePlot(mom_weight, stringForArcTanCombined))
             stringForLogWeightSum = stringForLogWeightSum[:-1]
+            stringForWeightRatio_one_vs_all = stringForWeightSum[:-1]
             stringForWeightSum = '-log10('+stringForWeightSum[:-1]+')'
             stringForWeightProduct = stringForWeightProduct[:-1]
+            stringForWeightRatioPunderated = stringForPonderatedWeightSum[:-1]
+            for mom_weight in mom_weightList:
+                self.momemta_weights_fromtree_plot.extend([
+                        #{
+                        #'name': 'weightRatioPunderated_'+mom_weight+'_vs_all_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': '('+mom_weight+'_weight/%s)'%renorm_factors[mom_weight]+'/(%s)'%stringForWeightRatioPunderated,
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(100, 0, 1)'
+                        #},
+                        #{
+                        #'name': 'sigmoid_weightRatio_'+mom_weight+'_vs_all_03_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': "1/(1+exp(-0.3*log10((" + mom_weight + "_weight)/(%s))))"%stringForWeightRatio_one_vs_all,
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(100, 0, 1)'
+                        #},
+                        #{
+                        #'name': 'sigmoid_punderatedWeightRatio_'+mom_weight+'_vs_all_03_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        #'variable': "1/(1+exp(-0.3*log10((" + mom_weight + "_weight/%s)/(%s))))"%(renorm_factors[mom_weight], stringForWeightRatioPunderated),
+                        #'plot_cut': self.totalCut,
+                        #'binning': '(100, 0, 1)'
+                        #}
+                        {
+                        'name': 'arcTan_weightRatio_'+mom_weight+'_vs_all_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': "(atan(log10((" + mom_weight + "_weight)/(%s)))+1.571)/3.15"%stringForWeightRatio_one_vs_all,
+                        'plot_cut': self.totalCut,
+                        'binning': '(100, 0, 1)'
+                        },
+                        {
+                        'name': 'arcTan_punderatedWeightRatio_'+mom_weight+'_vs_all_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
+                        'variable': "(atan(log10((" + mom_weight + "_weight/%s)/(%s)))+1.571)/3.15"%(renorm_factors[mom_weight], stringForWeightRatioPunderated),
+                        'plot_cut': self.totalCut,
+                        'binning': '(100, 0, 1)'
+                        }
+                        ])
             stringForPonderatedWeightSum = "-log10("+stringForPonderatedWeightSum[:-1]+")"
             stringForPonderatedWeightProduct = stringForPonderatedWeightProduct[:-1]
 
@@ -1533,8 +1636,44 @@ class BasePlotter:
 
         plotsToReturn = []
         
+        #for plotFamily in requested_plots:
+        #   if systematic == "scale" :
+        #        scaleIndices = ["0", "1", "2", "3", "4", "5"]
+        #        for scaleIndice in scaleIndices :
+        #            scaleWeight = "event_scale_weights[%s]"%scaleIndice
+        #            for plot in getattr(self, plotFamily+"_plot"):
+        #                tempPlot = copy.deepcopy(plot)
+        #                tempPlot["normalize-to"] = "scale_%s"%scaleIndice
+        #                tempPlot["name"] += "__scale%s"%scaleIndice
+        #                if not "Weight" in plotFamily :
+        #                    tempPlot["weight"] = "event_weight" + " * " + scaleWeight
+        #                    for weight in weights :  
+        #                        tempPlot["weight"] += " * " + available_weights[weight]
+        #                else :
+        #                    print "No other weight then event_weight for ", plotFamily 
+        #                plotsToReturn.append(tempPlot)
+        #    elif "pdf" in systematic :
+        #        for plot in getattr(self, plotFamily+"_plot"):
+        #            if not "Weight" in plotFamily :
+        #                plot["weight"] = "event_weight" + " * " + pdfWeight
+        #                plot["normalize-to"] = normalization
+        #                for weight in weights :  
+        #                    plot["weight"] += " * " + available_weights[weight]
+        #            else :
+        #                print "No other weight then event_weight for ", plotFamily 
+        #            plotsToReturn.append(plot)
+        #    else :
+        #        for plot in getattr(self, plotFamily+"_plot"):
+        #            if not "Weight" in plotFamily :
+        #                plot["weight"] = "event_weight"
+        #                plot["normalize-to"] = normalization
+        #                for weight in weights :  
+        #                    plot["weight"] += " * " + available_weights[weight]
+        #            else :
+        #                print "No other weight then event_weight for ", plotFamily 
+        #            plotsToReturn.append(plot)
+
         for plotFamily in requested_plots:
-            
             if "scale" in systematic:
                 
                 scaleIndices = ["0", "1", "2", "3", "4", "5"]

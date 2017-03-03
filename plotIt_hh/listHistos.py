@@ -9,6 +9,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Facility to produce the yml with plots information.')
 parser.add_argument('--yields', help='If you just want to produce the yields and systematics.', action="store_true")
 parser.add_argument('-d', '--directory', dest='directory', default="MIS_RUNII_firstRound", help='Directory of the input rootfiles.')
+parser.add_argument('--pattern', dest='pattern', default="", help='Pattern you want to see in the plotName')
 parser.add_argument('--blinded', dest='unblinded', help='If you want to produce blinded plots', action="store_false")
 args = parser.parse_args()
 
@@ -63,7 +64,9 @@ for key in keys:
         #    continue
 
         # skip 2D histos
-        if "_vs_" in key.GetName() and "combined" not in key.GetName(): continue
+        #if "_vs_" in key.GetName() and "combined" not in key.GetName(): continue
+        if not args.pattern in key.GetName():
+            continue
 
         #if "highBDT" in key.GetName(): continue
         #if "highBDT" not in key.GetName(): continue

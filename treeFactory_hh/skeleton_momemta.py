@@ -18,7 +18,7 @@ def generate_weight_code(basePlotter):
         using namespace momemta;\n
         ParameterSet dy_lua_parameters;\n
     """
-    globals.extra_branches.extend(["hh_llmetjj_HWWleptons_btagM_csv", "hh_leptons", "hh_jets", "event_is_data"])
+    globals.extra_branches.extend(["hh_jerup_llmetjj_HWWleptons_btagM_csv", "hh_jerup_leptons", "hh_jerup_jets", "event_is_data"])
     #dy_lua_parameters.set("matrix_element_prefix", "pp_to_Z_to_llbb"); //  pp_to_llbb, gg_to_z_to_llbb, pp_to_Z_to_llbb
 
     #matrix_element_prefix = "pp_to_Z_to_llbb"
@@ -68,7 +68,7 @@ def generate_weight_code(basePlotter):
                 "mumu": [],
     }
     weightFromTree_glob = True
-    weightFileDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/treeFactory_hh/weightProd_v1/condor/output/"
+    weightFileDir = "/home/fynu/bfrancois/scratch/framework/MIS_prod_data/CMSSW_7_6_5/src/cp3_llbb/HHTools/treeFactory_hh/weightProddfdfqsfetdfse___________________________________v1/condor/output/"
     weightTagVersion = "v0.1.5?76X_HHAnalysis_v1.0?765_MISearch_2016-08-10.v3"#"v0.1.5?76X_HHAnalysis_v1.0?765_MISearch_2016-08-10.v3"  # Tag appended to the actual rootFiles in the directory (we will replace currentTagVersion by weightTagVersion to do the TChain
     currentTagVersion = "v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3"#"v0.1.5+76X_HHAnalysis_v1.0+765_MISearch_2016-08-10.v3" # Tag of the sample names we run on for this production 
     if weightFromTree_glob :

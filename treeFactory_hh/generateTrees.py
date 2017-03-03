@@ -15,12 +15,12 @@ plots = []
 # Plot configuration
 
 # llbb 
-basePlotter = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagT_csv", btagWP_str = 'tight', objects = "nominal")
+basePlotter = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "nominal")
 weights_llbb = []
 flavour = "All"
 categories_llbb = [flavour]
 stage_llbb = "no_cut"
-plots_llbb = ["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'evt', "momemta_combine", "momemta_weights_fromtree", "momemta_weights_skimmer", "mis"]
+plots_llbb = ["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'scaleWeight', 'pdfWeight', 'forSkimmer', 'csv', 'flavour', 'evt', "momemta_combine", "momemta_weights_fromtree", "momemta_weights_skimmer", "mis", "one_vs_all"]
 plots.extend(basePlotter.generatePlots(categories_llbb, stage_llbb, requested_plots = plots_llbb, weights = weights_llbb, extraCut = "", systematic = "nominal"))
 
 tree = {}
@@ -28,7 +28,7 @@ tree["name"] = "t"
 tree["cut"] = basePlotter.totalCut
 tree["branches"] = []
 
-# Store scale factors with systematics. Careful!! Wust be after the tree["cut"] definition
+# Store scale factors with systematics. Careful!! Must be after the tree["cut"] definition
 def SF_systematics(name, lepton_SF = False):
     if lepton_SF : 
         plot_up = basePlotter.generatePlots(categories_llbb, stage_llbb, requested_plots = ["llidisoWeight"], weights = weights_llbb, extraCut = "", systematic = name+"up")[0]
@@ -80,3 +80,5 @@ code_in_loop = globals.code_in_loop
 extra_branches = globals.extra_branches
 code_after_loop = globals.code_after_loop
 include_directories.append(os.path.join(scriptDir, "..", "common"))
+headers.append( os.path.join(scriptDir, "..", "common", "readMVA.h") )
+
