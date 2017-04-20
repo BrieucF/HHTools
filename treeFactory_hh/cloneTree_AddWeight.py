@@ -11,14 +11,14 @@ from HHAnalysis import HH
 # Plot configuration
 plots = []
 # llbb 
-basePlotter = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "jerup")
+basePlotter = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "nominal")
 weights_llbb = []
 flavour = "All" # Careful! only one is allow otherwise the check "if (%s) {\n"%basePlotter.totalCut" is not fullfilled in the in_loop_code
 categories_llbb = [flavour]
 stage_llbb = "no_cut"
 #plots_llbb = ["momemta_weights", "basic", "flavour", "mll", "mjj"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
 plots_llbb = ["momemta_weights", "momemta_weights_cloner"]  #["mll", "mjj", "basic", "bdtinput", "ht", "other", "llidisoWeight", 'jjbtagWeight', 'trigeffWeight', 'puWeight', 'forSkimmer', 'csv', 'flavour', 'mis', 'evt']
-plots.extend(basePlotter.generatePlots(categories_llbb, stage_llbb, systematic = "jerup", weights = weights_llbb, requested_plots = plots_llbb))
+plots.extend(basePlotter.generatePlots(categories_llbb, stage_llbb, systematic = "nominal", weights = weights_llbb, requested_plots = plots_llbb))
 
 #basePlotter = BasePlotter(baseObjectName = "hh_llmetjj_HWWleptons_btagM_csv", btagWP_str = 'medium', objects = "jecdown")
 #plots.extend(basePlotter.generatePlots(categories_llbb, stage_llbb, systematic = "jecdown", weights = weights_llbb, requested_plots = plots_llbb))

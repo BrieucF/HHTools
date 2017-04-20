@@ -34,11 +34,13 @@ if args.flat :
     fileList = [file for file in os.listdir(args.directory) if "histos.root" in file]
 else :
     fileList = [file for file in os.listdir(args.directory) if "histos_" in file]
+
 samplesDict = {}
+
 for file in fileList:
     sampleName = file.split("_histos")[0]
     if sampleName.startswith("DYbb") or sampleName.startswith("DYbx") or sampleName.startswith("DYxx") : 
-        fileList.remove(file)
+        #fileList.remove(file)
         continue
     if not sampleName in samplesDict.keys():
         samplesDict[sampleName] = []
@@ -47,6 +49,10 @@ for file in fileList:
 for sampleName in samplesDict.keys():
     print "Getting father DB sample : %s"%sampleName
     father_db_sample = get_sample(unicode(sampleName)) # Construct the new sample from his father
+    new_sample_name = (sampleName + args.suffix).replace(args.str_to_replace, "")
+    if get_sample(unicode(new_sample_name)) :  
+	print "Sample ", new_sample_name, " already exists, skipping."
+	continue
     nevents = 0
     db_fileList = []
     for fileName in samplesDict[sampleName] :
@@ -56,7 +62,7 @@ for sampleName in samplesDict.keys():
         temp_nevent = rootTree.GetEntries()
         nevents += temp_nevent
         db_fileList.append(File(unicode(fileName), u"", 0, u"{}", temp_nevent))
-    db_sample = Sample(unicode((sampleName + args.suffix).replace(args.str_to_replace, "")), unicode(os.path.join(currentDir, args.directory)), u'SKIM', nevents)
+    db_sample = Sample(unicode(new_sample_name), unicode(os.path.join(currentDir, args.directory)), u'SKIM', nevents)
     for db_file in db_fileList :
         db_sample.files.add(db_file)
     db_sample.source_sample_id = father_db_sample.sample_id

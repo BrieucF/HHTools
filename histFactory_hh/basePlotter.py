@@ -1220,13 +1220,13 @@ class BasePlotter:
                         }, 
                         {
                         'name': name+'_punderated_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': name+'_weight/%s'%renorm_factors[name],
+                        'variable': name+'_weight == std::numeric_limits<double>::min() ? std::numeric_limits<double>::min() : ' + name+'_weight/%s'%renorm_factors[name],
                         'plot_cut': self.totalCut,
                         'binning': '(80, 0, 1e-15)'
                         }, 
                         {
                         'name': name+'_minLog_punderated_weight_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': "-log10("+name+'_weight/%s)'%renorm_factors[name],
+                        'variable': name+'_weight == std::numeric_limits<double>::min() ? -log10(std::numeric_limits<double>::min() ) : -log10('+name+'_weight/%s)'%renorm_factors[name],
                         'plot_cut': self.totalCut,
                         'binning': '(80, 15, 40)'
                         }, 
@@ -1271,7 +1271,7 @@ class BasePlotter:
                 return [
                         {
                         'name': 'arcTanPunderated_'+name1+'_minus_'+name2+'_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': '(std::atan(log10(' + name1 + '_weight/%s)/('%renorm_factors[name1] + name2 + '_weight/%s))+1.571)/3.15'%renorm_factors[name2],
+                        'variable':  name1 + '_weight == std::numeric_limits<double>::min() ? (' + name2 + '_weight == std::numeric_limits<double>::min() ? 0.5 : 0.) : ('+ name2 + '_weight == std::numeric_limits<double>::min() ? 0.99999 : (std::atan(log10(' + name1 + '_weight/%s)/('%renorm_factors[name1] + name2 + '_weight/%s))+1.571)/3.15 )'%renorm_factors[name2],
                         'plot_cut': self.totalCut,
                         'binning': '(90, 0, 1)'
                         },
@@ -1429,7 +1429,7 @@ class BasePlotter:
                         },
                         {
                         'name': 'arcTan_punderatedWeightRatio_'+mom_weight+'_vs_allButOne_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': "(atan(log10((" + mom_weight + "_weight/%s)/(%s)))+1.571)/3.15"%(renorm_factors[mom_weight], stringForSigmoidPunderatedWeightRatio),
+                        'variable': mom_weight + '_weight == std::numeric_limits<double>::min() ? 0.0000001 : (atan(log10((' + mom_weight + '_weight/%s)/(%s)))+1.571)/3.15'%(renorm_factors[mom_weight], stringForSigmoidPunderatedWeightRatio),
                         'plot_cut': self.totalCut,
                         'binning': '(150, 0, 1)'
                         }
@@ -1472,7 +1472,7 @@ class BasePlotter:
                         },
                         {
                         'name': 'arcTan_punderatedWeightRatio_'+mom_weight+'_vs_all_%s_%s_%s%s'%(self.llFlav, self.suffix, self.extraString, self.systematicString),
-                        'variable': "(atan(log10((" + mom_weight + "_weight/%s)/(%s)))+1.571)/3.15"%(renorm_factors[mom_weight], stringForWeightRatioPunderated),
+                        'variable': mom_weight + '_weight == std::numeric_limits<double>::min() ? 0.0000001 : (atan(log10((' + mom_weight + '_weight/%s)/(%s)))+1.571)/3.15'%(renorm_factors[mom_weight], stringForWeightRatioPunderated),
                         'plot_cut': self.totalCut,
                         'binning': '(100, 0, 1)'
                         }

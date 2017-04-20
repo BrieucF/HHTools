@@ -18,7 +18,7 @@ def generate_weight_code(basePlotter):
         using namespace momemta;\n
         ParameterSet dy_lua_parameters;\n
     """
-    globals.extra_branches.extend(["hh_jerup_llmetjj_HWWleptons_btagM_csv", "hh_jerup_leptons", "hh_jerup_jets", "event_is_data"])
+    globals.extra_branches.extend(["hh_llmetjj_HWWleptons_btagM_csv", "hh_leptons", "hh_jets", "event_is_data"])
     #dy_lua_parameters.set("matrix_element_prefix", "pp_to_Z_to_llbb"); //  pp_to_llbb, gg_to_z_to_llbb, pp_to_Z_to_llbb
 
     #matrix_element_prefix = "pp_to_Z_to_llbb"

@@ -201,12 +201,12 @@ if args.filter:
 
         if splitDY and 'DYJetsToLL_' in sample["db_name"]:
             print "Splitting DY flavour content."
-            print '\033[93m'+"Careful!!!! We use hh_llmetjj_HWWleptons_btagT_csv[0].gen_**"+'\033[0m'
+            print '\033[93m'+"Careful!!!! We use hh_llmetjj_HWWleptons_btagM_csv[0].gen_**"+'\033[0m'
             # DY bb
             dy_bb_sample = copy.deepcopy(sample)
             dy_bb_sample["db_name"] = dy_bb_sample["db_name"].replace("DYJets", "DYbb")
             newJson = copy.deepcopy(sample["json_skeleton"][sample["db_name"]])
-            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagT_csv[0].gen_bb)"
+            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagM_csv[0].gen_bb)"
             dy_bb_sample["json_skeleton"][dy_bb_sample["db_name"]] = newJson
             dy_bb_sample["json_skeleton"].pop(sample["db_name"])
             mySub.sampleCfg.append(dy_bb_sample)
@@ -215,7 +215,7 @@ if args.filter:
             dy_bx_sample = copy.deepcopy(sample)
             dy_bx_sample["db_name"] = dy_bx_sample["db_name"].replace("DYJets", "DYbx")
             newJson = copy.deepcopy(sample["json_skeleton"][sample["db_name"]])
-            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagT_csv[0].gen_bl || hh_llmetjj_HWWleptons_btagT_csv[0].gen_bc)"
+            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagM_csv[0].gen_bl || hh_llmetjj_HWWleptons_btagM_csv[0].gen_bc)"
             dy_bx_sample["json_skeleton"][dy_bx_sample["db_name"]] = newJson
             dy_bx_sample["json_skeleton"].pop(sample["db_name"])
             mySub.sampleCfg.append(dy_bx_sample)
@@ -224,7 +224,7 @@ if args.filter:
             dy_xx_sample = copy.deepcopy(sample)
             dy_xx_sample["db_name"] = dy_xx_sample["db_name"].replace("DYJets", "DYxx")
             newJson = copy.deepcopy(sample["json_skeleton"][sample["db_name"]])
-            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagT_csv[0].gen_cc || hh_llmetjj_HWWleptons_btagT_csv[0].gen_cl || hh_llmetjj_HWWleptons_btagT_csv[0].gen_ll)"
+            newJson["sample_cut"] = "(hh_llmetjj_HWWleptons_btagM_csv[0].gen_cc || hh_llmetjj_HWWleptons_btagM_csv[0].gen_cl || hh_llmetjj_HWWleptons_btagM_csv[0].gen_ll)"
             dy_xx_sample["json_skeleton"][dy_xx_sample["db_name"]] = newJson
             dy_xx_sample["json_skeleton"].pop(sample["db_name"])
             mySub.sampleCfg.append(dy_xx_sample)
